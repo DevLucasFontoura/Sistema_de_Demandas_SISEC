@@ -148,116 +148,120 @@ export function DetalhesSolicitacao({
             Demanda: {solicitacao.id}
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div className="space-y-4">
-              <div className="p-4 rounded-lg bg-[#f2f3f5] border border-gray-900">
-                <h3 className="text-sm font-medium text-gray-500">Status</h3>
-                {isEditing ? (
-                  <select
-                    value={solicitacao.status}
-                    onChange={(e) => handleUpdate('status', e.target.value)}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-                  >
-                    <option value="pendente">Pendente</option>
-                    <option value="em_andamento">Em Andamento</option>
-                    <option value="concluida">Concluída</option>
-                  </select>
-                ) : (
-                  <div className="mt-1">
-                    <StatusSolicitacao status={solicitacao.status} />
-                  </div>
-                )}
-              </div>
-
-              <div className="p-4 rounded-lg bg-[#f2f3f5] border border-gray-900">
-                <h3 className="text-sm font-medium text-gray-500">Título</h3>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    value={solicitacao.titulo}
-                    onChange={(e) => handleUpdate('titulo', e.target.value)}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-                  />
-                ) : (
-                  <p className="mt-1 text-gray-800">{solicitacao.titulo}</p>
-                )}
-              </div>
-
-              <div className="p-4 rounded-lg bg-[#f2f3f5] border border-gray-900">
-                <h3 className="text-sm font-medium text-gray-500">Tipo</h3>
-                {isEditing ? (
-                  <select
-                    value={solicitacao.tipo}
-                    onChange={(e) => handleUpdate('tipo', e.target.value)}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-                  >
-                    <option value="desenvolvimento">Desenvolvimento</option>
-                    <option value="dados">Dados</option>
-                  </select>
-                ) : (
-                  <p className="mt-1 text-gray-800">{solicitacao.tipo}</p>
-                )}
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <div className="p-4 rounded-lg bg-[#f2f3f5] border border-gray-900">
+              <h3 className="text-sm font-medium text-gray-500">Status</h3>
+              {isEditing ? (
+                <select
+                  value={solicitacao.status}
+                  onChange={(e) => handleUpdate('status', e.target.value)}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                >
+                  <option value="pendente">Pendente</option>
+                  <option value="em_andamento">Em Andamento</option>
+                  <option value="concluida">Concluída</option>
+                </select>
+              ) : (
+                <div className="mt-1">
+                  <StatusSolicitacao status={solicitacao.status} />
+                </div>
+              )}
             </div>
 
-            <div className="space-y-4">
-              <div className="p-4 rounded-lg bg-[#f2f3f5] border border-gray-900">
-                <h3 className="text-sm font-medium text-gray-500">Solicitante</h3>
-                <p className="mt-1 text-gray-800">{solicitacao.solicitante}</p>
-              </div>
+            <div className="p-4 rounded-lg bg-[#f2f3f5] border border-gray-900">
+              <h3 className="text-sm font-medium text-gray-500">Data de Criação</h3>
+              <p className="mt-1 text-gray-800">
+                {formatDate(solicitacao.dataCriacao)}
+              </p>
+            </div>
 
-              <div className="p-4 rounded-lg bg-[#f2f3f5] border border-gray-900">
-                <h3 className="text-sm font-medium text-gray-500">Data de Criação</h3>
+            <div className="p-4 rounded-lg bg-[#f2f3f5] border border-gray-900">
+              <h3 className="text-sm font-medium text-gray-500">Prazo</h3>
+              {isEditing ? (
+                <input
+                  type="date"
+                  value={solicitacao.prazo}
+                  onChange={(e) => handleUpdate('prazo', e.target.value)}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                />
+              ) : (
                 <p className="mt-1 text-gray-800">
-                  {formatDate(solicitacao.dataCriacao)}
+                  {formatDate(solicitacao.prazo)}
                 </p>
-              </div>
+              )}
+            </div>
 
-              <div className="p-4 rounded-lg bg-[#f2f3f5] border border-gray-900">
-                <h3 className="text-sm font-medium text-gray-500">Prazo</h3>
-                {isEditing ? (
-                  <input
-                    type="date"
-                    value={solicitacao.prazo}
-                    onChange={(e) => handleUpdate('prazo', e.target.value)}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-                  />
-                ) : (
-                  <p className="mt-1 text-gray-800">
-                    {formatDate(solicitacao.prazo)}
-                  </p>
-                )}
-              </div>
-
-              <div className="p-4 rounded-lg bg-[#f2f3f5] border border-gray-900">
-                <h3 className="text-sm font-medium text-gray-500">Responsável</h3>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    value={solicitacao.responsavel || ''}
-                    onChange={(e) => handleUpdate('responsavel', e.target.value)}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-                  />
-                ) : (
-                  <p className="mt-1 text-gray-800">{solicitacao.responsavel}</p>
-                )}
-              </div>
+            <div className="p-4 rounded-lg bg-[#f2f3f5] border border-gray-900">
+              <h3 className="text-sm font-medium text-gray-500">Solicitante</h3>
+              <p className="mt-1 text-gray-800">{solicitacao.solicitante}</p>
             </div>
           </div>
 
-          {/* Descrição em largura total */}
-          <div className="p-4 rounded-lg bg-[#f2f3f5] border border-gray-900">
-            <h3 className="text-sm font-medium text-gray-500">Descrição</h3>
-            {isEditing ? (
-              <textarea
-                value={solicitacao.descricao}
-                onChange={(e) => handleUpdate('descricao', e.target.value)}
-                rows={3}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-              />
-            ) : (
-              <p className="mt-1 text-gray-800">{solicitacao.descricao}</p>
-            )}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div className="p-4 rounded-lg bg-[#f2f3f5] border border-gray-900">
+              <h3 className="text-sm font-medium text-gray-500">Título</h3>
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={solicitacao.titulo}
+                  onChange={(e) => handleUpdate('titulo', e.target.value)}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                />
+              ) : (
+                <p className="mt-1 text-gray-800">{solicitacao.titulo}</p>
+              )}
+            </div>
+
+            <div className="p-4 rounded-lg bg-[#f2f3f5] border border-gray-900">
+              <h3 className="text-sm font-medium text-gray-500">Tipo</h3>
+              {isEditing ? (
+                <select
+                  value={solicitacao.tipo}
+                  onChange={(e) => handleUpdate('tipo', e.target.value)}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                >
+                  <option value="desenvolvimento">Desenvolvimento</option>
+                  <option value="dados">Dados</option>
+                </select>
+              ) : (
+                <p className="mt-1 text-gray-800">{solicitacao.tipo}</p>
+              )}
+            </div>
+
+            <div className="p-4 rounded-lg bg-[#f2f3f5] border border-gray-900">
+              <h3 className="text-sm font-medium text-gray-500">Responsável</h3>
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={solicitacao.responsavel || ''}
+                  onChange={(e) => handleUpdate('responsavel', e.target.value)}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                />
+              ) : (
+                <p className="mt-1 text-gray-800">{solicitacao.responsavel}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="p-4 rounded-lg bg-[#f2f3f5] border border-gray-900">
+              <h3 className="text-sm font-medium text-gray-500">Descrição</h3>
+              {isEditing ? (
+                <textarea
+                  value={solicitacao.descricao}
+                  onChange={(e) => handleUpdate('descricao', e.target.value)}
+                  rows={3}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                />
+              ) : (
+                <p className="mt-1 text-gray-800">{solicitacao.descricao}</p>
+              )}
+            </div>
+
+            <div className="p-4 rounded-lg bg-[#f2f3f5] border border-gray-900">
+              <h3 className="text-sm font-medium text-gray-500">Arquivos do Solicitante</h3>
+              {/* Adicione aqui a lógica para exibir os arquivos */}
+            </div>
           </div>
 
           <div className="mt-8 flex justify-end space-x-4">

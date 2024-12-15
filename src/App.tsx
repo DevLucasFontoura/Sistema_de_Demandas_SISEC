@@ -5,7 +5,7 @@ import NovaSolicitacao from './pages/NovaSolicitacao'
 import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
 import ListaSolicitacoes from './pages/ListaSolicitacoes'
-import DetalhesSolicitacao from './pages/DetalhesSolicitacao'
+import DetalhesSolicitacao from './pages/DetalhesDaSolicitacao'
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (

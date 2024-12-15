@@ -2,19 +2,16 @@ import { collection, addDoc, getDocs, query, orderBy, Timestamp } from '@firebas
 import { db } from './firebase'
 
 export interface Demanda {
-  id?: string
+  id: string
   tipo: 'desenvolvimento' | 'dados'
-  urgencia: 'baixa' | 'media' | 'alta'
+  urgencia: 'alta' | 'media' | 'baixa'
   prazo: Date
   solicitante: string
   descricao: string
-  status: 'pendente' | 'atendida'
+  status: 'pendente' | 'em_andamento' | 'concluida'
   dataCriacao: Date
-  adiamentos?: {
-    novoPrazo: Date
-    justificativa: string
-    dataAdiamento: Date
-  }[]
+  responsavel: string
+  titulo: string
 }
 
 const demandasRef = collection(db, 'demandas')

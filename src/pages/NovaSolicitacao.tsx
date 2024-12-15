@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
+import { generateUniqueId } from '../utils/generateId'
+import { formatDate } from '../utils/date'
 
 type TipoDemanda = 'desenvolvimento' | 'dados'
 type Urgencia = 'baixa' | 'media' | 'alta'
@@ -26,12 +28,22 @@ function NovaSolicitacao() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    const novaSolicitacao = {
+      ...formData,
+      id: generateUniqueId(),
+      status: 'pendente',
+      dataCriacao: new Date().toISOString()
+    }
+
     try {
-      // TODO: Implementar integração com Firebase
+      // Aqui você implementaria a lógica para salvar no Firebase
+      // await criarDemanda(novaSolicitacao)
+      
       toast.success('Solicitação criada com sucesso!')
-      navigate('/dashboard')
+      navigate('/lista-solicitacoes')
     } catch (error) {
       toast.error('Erro ao criar solicitação')
+      console.error(error)
     }
   }
 

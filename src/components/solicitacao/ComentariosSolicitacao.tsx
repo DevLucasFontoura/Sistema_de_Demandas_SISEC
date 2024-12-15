@@ -20,9 +20,14 @@ interface Comentario {
 interface ComentariosSolicitacaoProps {
   comentarios: Comentario[]
   onAddComentario: (texto: string, arquivos?: File[]) => void
+  className?: string
 }
 
-export function ComentariosSolicitacao({ comentarios, onAddComentario }: ComentariosSolicitacaoProps) {
+export function ComentariosSolicitacao({
+  comentarios,
+  onAddComentario,
+  className = '',
+}: ComentariosSolicitacaoProps) {
   const [novoComentario, setNovoComentario] = useState('')
   const [arquivosSelecionados, setArquivosSelecionados] = useState<File[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -51,12 +56,11 @@ export function ComentariosSolicitacao({ comentarios, onAddComentario }: Comenta
   }
 
   const handleDownload = (arquivo: Arquivo) => {
-    // Aqui você implementaria a lógica para download do arquivo
     window.open(arquivo.url, '_blank')
   }
 
   return (
-    <div className="mt-8 bg-white rounded-lg shadow-md p-6">
+    <div className={`mt-8 bg-white rounded-lg shadow-md p-6 ${className}`}>
       <h3 className="text-lg font-semibold text-gray-800 mb-4">Comentários</h3>
       
       <form onSubmit={handleSubmit} className="mb-6">

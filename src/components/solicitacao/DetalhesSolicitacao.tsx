@@ -142,7 +142,7 @@ export function DetalhesSolicitacao({
         <AdiamentoSolicitacao onAdiar={handleAdiarSolicitacao} />
       )}
       </div>
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-white rounded-lg shadow-md p-6 border border-gray-900">
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">
             Demanda: {solicitacao.id}
@@ -150,7 +150,7 @@ export function DetalhesSolicitacao({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div className="space-y-4">
-              <div className="p-4 rounded-lg bg-[#f2f3f5]">
+              <div className="p-4 rounded-lg bg-[#f2f3f5] border border-gray-900">
                 <h3 className="text-sm font-medium text-gray-500">Status</h3>
                 {isEditing ? (
                   <select
@@ -169,7 +169,7 @@ export function DetalhesSolicitacao({
                 )}
               </div>
 
-              <div className="p-4 rounded-lg bg-[#f2f3f5]">
+              <div className="p-4 rounded-lg bg-[#f2f3f5] border border-gray-900">
                 <h3 className="text-sm font-medium text-gray-500">Título</h3>
                 {isEditing ? (
                   <input
@@ -183,7 +183,7 @@ export function DetalhesSolicitacao({
                 )}
               </div>
 
-              <div className="p-4 rounded-lg bg-[#f2f3f5]">
+              <div className="p-4 rounded-lg bg-[#f2f3f5] border border-gray-900">
                 <h3 className="text-sm font-medium text-gray-500">Tipo</h3>
                 {isEditing ? (
                   <select
@@ -201,19 +201,19 @@ export function DetalhesSolicitacao({
             </div>
 
             <div className="space-y-4">
-              <div className="p-4 rounded-lg bg-[#f2f3f5]">
+              <div className="p-4 rounded-lg bg-[#f2f3f5] border border-gray-900">
                 <h3 className="text-sm font-medium text-gray-500">Solicitante</h3>
                 <p className="mt-1 text-gray-800">{solicitacao.solicitante}</p>
               </div>
 
-              <div className="p-4 rounded-lg bg-[#f2f3f5]">
+              <div className="p-4 rounded-lg bg-[#f2f3f5] border border-gray-900">
                 <h3 className="text-sm font-medium text-gray-500">Data de Criação</h3>
                 <p className="mt-1 text-gray-800">
                   {formatDate(solicitacao.dataCriacao)}
                 </p>
               </div>
 
-              <div className="p-4 rounded-lg bg-[#f2f3f5]">
+              <div className="p-4 rounded-lg bg-[#f2f3f5] border border-gray-900">
                 <h3 className="text-sm font-medium text-gray-500">Prazo</h3>
                 {isEditing ? (
                   <input
@@ -229,7 +229,7 @@ export function DetalhesSolicitacao({
                 )}
               </div>
 
-              <div className="p-4 rounded-lg bg-[#f2f3f5]">
+              <div className="p-4 rounded-lg bg-[#f2f3f5] border border-gray-900">
                 <h3 className="text-sm font-medium text-gray-500">Responsável</h3>
                 {isEditing ? (
                   <input
@@ -246,7 +246,7 @@ export function DetalhesSolicitacao({
           </div>
 
           {/* Descrição em largura total */}
-          <div className="p-4 rounded-lg bg-[#f2f3f5]">
+          <div className="p-4 rounded-lg bg-[#f2f3f5] border border-gray-900">
             <h3 className="text-sm font-medium text-gray-500">Descrição</h3>
             {isEditing ? (
               <textarea
@@ -290,6 +290,7 @@ export function DetalhesSolicitacao({
       <ComentariosSolicitacao
         comentarios={solicitacao.comentarios || []}
         onAddComentario={handleAddComentario}
+        className="bg-white border border-gray-900 rounded-lg p-6"
       />
     </div>
   )

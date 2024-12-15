@@ -4,21 +4,29 @@ import { ElementType } from 'react'
 interface CardTotalProps {
   title: string
   value: string
-  icon: ElementType // Usando ElementType para melhor tipagem de componentes
+  icon: ElementType
+  className?: string
+  iconClassName?: string
+  borderClassName?: string
 }
 
-export function CardTotal({ title, value, icon: Icon }: CardTotalProps) {
+export function CardTotal({ 
+  title, 
+  value, 
+  icon: Icon,
+  className = "bg-white",
+  iconClassName = "bg-gray-100",
+  borderClassName = "border-gray-900"
+}: CardTotalProps) {
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className={`p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow border ${className} ${borderClassName}`}>
       <div className="flex items-center">
-        <div className="p-3 rounded-full bg-primary-100 bg-opacity-30">
-          <Icon className="h-8 w-8 text-primary-600" />
-        </div>
-        <div className="ml-4">
-          <h3 className="text-gray-500 text-sm">{title}</h3>
-          <p className="text-2xl font-semibold text-gray-800">{value}</p>
+        <div className={`p-2 rounded-lg ${iconClassName}`}>
+          <Icon className="w-6 h-6 text-gray-900" />
         </div>
       </div>
+      <p className="mt-4 text-3xl font-semibold text-gray-900">{value}</p>
+      <p className="mt-1 text-sm font-medium text-gray-900">{title}</p>
     </div>
   )
 }

@@ -9,70 +9,6 @@ import {
 import { Demanda } from '../services/demandas'
 import { formatDate } from '../utils/date'
 
-// Dados mockados para exemplo
-const solicitacoesExemplo: Demanda[] = [
-  {
-    id: '123456',
-    tipo: 'desenvolvimento',
-    urgencia: 'alta',
-    prazo: new Date('2024-03-15'),
-    solicitante: 'João Silva',
-    descricao: 'Implementação de novo módulo de relatórios',
-    status: 'pendente',
-    dataCriacao: new Date('2024-02-01'),
-    responsavel: 'Maria Santos',
-    titulo: 'Novo Módulo de Relatórios'
-  },
-  {
-    id: '234567',
-    tipo: 'dados',
-    urgencia: 'media',
-    prazo: new Date('2024-03-20'),
-    solicitante: 'Ana Oliveira',
-    descricao: 'Análise de dados de vendas do último trimestre',
-    status: 'em_andamento',
-    dataCriacao: new Date('2024-02-05'),
-    responsavel: 'Carlos Mendes',
-    titulo: 'Análise de Vendas'
-  },
-  {
-    id: '345678',
-    tipo: 'desenvolvimento',
-    urgencia: 'baixa',
-    prazo: new Date('2024-04-01'),
-    solicitante: 'Pedro Costa',
-    descricao: 'Correção de bugs no sistema de login',
-    status: 'concluida',
-    dataCriacao: new Date('2024-02-10'),
-    responsavel: 'Lucas Ferreira',
-    titulo: 'Correção de Bugs'
-  },
-  {
-    id: '456789',
-    tipo: 'dados',
-    urgencia: 'alta',
-    prazo: new Date('2024-03-10'),
-    solicitante: 'Mariana Lima',
-    descricao: 'Integração com nova API de pagamentos',
-    status: 'pendente',
-    dataCriacao: new Date('2024-02-12'),
-    responsavel: 'Rafael Santos',
-    titulo: 'Integração com API de Pagamentos'
-  },
-  {
-    id: '567890',
-    tipo: 'desenvolvimento',
-    urgencia: 'media',
-    prazo: new Date('2024-03-25'),
-    solicitante: 'Bruno Alves',
-    descricao: 'Implementação de novo design system',
-    status: 'em_andamento',
-    dataCriacao: new Date('2024-02-15'),
-    responsavel: 'Julia Pereira',
-    titulo: 'Implementação de Design System'
-  }
-]
-
 export function StatusBadge({ status }: { status: Demanda['status'] }) {
   const styles = {
     pendente: 'bg-yellow-100 text-yellow-800',
@@ -119,8 +55,8 @@ export function UrgenciaBadge({ urgencia }: { urgencia: Demanda['urgencia'] }) {
 function ListaSolicitacoes() {
   const navigate = useNavigate()
   const [searchId, setSearchId] = useState('')
-  const [solicitacoes] = useState<Demanda[]>(solicitacoesExemplo)
-  const [filteredSolicitacoes, setFilteredSolicitacoes] = useState<Demanda[]>(solicitacoesExemplo)
+  const [solicitacoes, setSolicitacoes] = useState<Demanda[]>([])
+  const [filteredSolicitacoes, setFilteredSolicitacoes] = useState<Demanda[]>([])
 
   useEffect(() => {
     // Filtra as solicitações com base no ID de busca
@@ -214,8 +150,7 @@ function ListaSolicitacoes() {
                       solicitacao.status === 'em_andamento' ? 'bg-blue-100 text-blue-800' : 
                       'bg-green-100 text-green-800'}`}
                   >
-                    {solicitacao.status === 'em_andamento' ? 'Em Andamento' : 
-                      solicitacao.status.charAt(0).toUpperCase() + solicitacao.status.slice(1)}
+                    {solicitacao.status.charAt(0).toUpperCase() + solicitacao.status.slice(1)}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -228,20 +163,6 @@ function ListaSolicitacoes() {
             ))}
           </tbody>
         </table>
-
-        {filteredSolicitacoes.length === 0 && (
-          <div className="text-center py-12">
-            <ExclamationTriangleIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">
-              Nenhuma solicitação encontrada
-            </h3>
-            <p className="mt-1 text-sm text-gray-500">
-              {searchId 
-                ? "Não foi encontrada nenhuma solicitação com este ID."
-                : "Não existem solicitações cadastradas."}
-            </p>
-          </div>
-        )}
       </div>
     </div>
   )

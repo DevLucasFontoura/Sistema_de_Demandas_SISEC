@@ -10,19 +10,19 @@ import { GraficoDeBarras } from '../components/GraficoDeBarras'
 import { GraficoDePizza } from '../components/GraficoDePizza'
 import { CardTotal } from '../components/CardTotal'
 
-// Dados de exemplo (depois serão substituídos por dados do Firebase)
-const barData = [
-  { mes: 'Jan', atendidas: 4, canceladas: 1 },
-  { mes: 'Fev', atendidas: 3, canceladas: 2 },
-  { mes: 'Mar', atendidas: 6, canceladas: 1 },
-  { mes: 'Abr', atendidas: 8, canceladas: 4 },
-  { mes: 'Mai', atendidas: 5, canceladas: 2 },
-]
+// Remova ou comente os dados de exemplo
+// const barData = [
+//   { mes: 'Jan', atendidas: 4, canceladas: 1 },
+//   { mes: 'Fev', atendidas: 3, canceladas: 2 },
+//   { mes: 'Mar', atendidas: 6, canceladas: 1 },
+//   { mes: 'Abr', atendidas: 8, canceladas: 4 },
+//   { mes: 'Mai', atendidas: 5, canceladas: 2 },
+// ]
 
-const pieData = [
-  { name: 'Desenvolvimento', value: 60 },
-  { name: 'Dados', value: 40 },
-]
+// const pieData = [
+//   { name: 'Desenvolvimento', value: 60 },
+//   { name: 'Dados', value: 40 },
+// ]
 
 function Dashboard() {
   return (
@@ -39,7 +39,7 @@ function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
           <CardTotal
             title="Total de Demandas"
-            value="48"
+            value=""
             icon={ChartBarIcon}
             className="bg-white"
             iconClassName="bg-gray-100"
@@ -47,7 +47,7 @@ function Dashboard() {
           />
           <CardTotal
             title="Em Andamento"
-            value="12"
+            value=""
             icon={ClockIcon}
             className="bg-white"
             iconClassName="bg-gray-100"
@@ -55,7 +55,7 @@ function Dashboard() {
           />
           <CardTotal
             title="Concluídas"
-            value="36"
+            value=""
             icon={CheckCircleIcon}
             className="bg-white"
             iconClassName="bg-gray-100"
@@ -63,7 +63,7 @@ function Dashboard() {
           />
           <CardTotal
             title="Canceladas"
-            value="5"
+            value=""
             icon={XCircleIcon}
             className="bg-white"
             iconClassName="bg-gray-100"
@@ -71,7 +71,7 @@ function Dashboard() {
           />
           <CardTotal
             title="Adiadas"
-            value="8"
+            value=""
             icon={CalendarIcon}
             className="bg-white"
             iconClassName="bg-gray-100"
@@ -92,7 +92,7 @@ function Dashboard() {
                 <option>Todo período</option>
               </select>
             </div>
-            <GraficoDeBarras data={barData} />
+            <GraficoDeBarras data={[]} />
           </div>
 
           <div className="bg-white border border-gray-900 rounded-xl p-6">
@@ -106,31 +106,7 @@ function Dashboard() {
                 <option>Todo período</option>
               </select>
             </div>
-            <GraficoDePizza data={pieData} />
-          </div>
-        </div>
-
-        {/* Seção de Atividades Recentes */}
-        <div className="mt-8 bg-white border border-gray-900 rounded-xl p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Atividades Recentes
-          </h2>
-          <div className="space-y-4">
-            {/* Exemplo de atividade */}
-            <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-              <div className="flex-shrink-0">
-                <CheckCircleIcon className="h-6 w-6 text-green-500" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-900">
-                  Demanda #123 foi concluída
-                </p>
-                <p className="text-sm text-gray-500">
-                  Há 2 horas
-                </p>
-              </div>
-            </div>
-            {/* Adicione mais atividades aqui */}
+            <GraficoDePizza data={[]} />
           </div>
         </div>
       </div>

@@ -7,8 +7,8 @@ function Sidebar() {
 
   const menuItems = [
     { path: '/dashboard', icon: HomeIcon, label: 'Dashboard' },
-    { path: '/lista-solicitacoes', icon: ClipboardDocumentListIcon, label: 'Solicitações' },
     { path: '/nova-solicitacao', icon: PlusCircleIcon, label: 'Nova Solicitação' },
+    { path: '/lista-solicitacoes', icon: ClipboardDocumentListIcon, label: 'Solicitações' },
   ]
 
   const isActive = (path: string) => location.pathname === path

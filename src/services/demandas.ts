@@ -38,7 +38,7 @@ export async function listarDemandas() {
     const q = query(demandasRef, orderBy('dataCriacao', 'desc'))
     const querySnapshot = await getDocs(q)
     
-    return querySnapshot.docs.map(doc => ({
+    return querySnapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data()
     })) as Demanda[]

@@ -7,32 +7,43 @@ function Login() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    if (!email || !password) {
+      setError('Por favor, preencha todos os campos.')
+      return
+    }
+    setError('')
     toast.success('Bem-vindo ao sistema!')
     navigate('/dashboard')
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-900 to-black p-8">
-      <div className="max-w-6xl w-full flex items-center justify-between">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-purple-900 to-black p-8">
+      <header className="text-center mb-1 mt-16">
+        <h1 className="text-6xl font-extrabold text-white mb-4">
+          Controle de Demandas
+        </h1>
+        <h2 className="text-4xl font-semibold text-purple-300">
+          Equipe TI MDS
+        </h2>
+      </header>
+      <div className="flex flex-1 justify-center items-center space-x-24">
         
         {/* Explicação do Sistema */}
-        <div className="text-white mr-8">
-          <h2 className="text-6xl font-extrabold mb-8 leading-tight">
-            Controle de Demandas<br />Equipe TI MDS
-          </h2>
-          <ul className="space-y-4 text-xl">
-            <li>Otimize a gestão de tarefas e melhore a eficiência da equipe.</li>
-            <li>Monitore o progresso em tempo real e colabore de forma eficaz.</li>
-            <li>Alcance seus objetivos com soluções integradas e intuitivas.</li>
-          </ul>
+        <div className="text-white text-2xl space-y-6 max-w-md">
+          <p>Otimize a gestão de tarefas e melhore a eficiência da equipe.</p>
+          <p>Monitore o progresso em tempo real e colabore de forma eficaz.</p>
+          <p>Alcance seus objetivos com soluções integradas e intuitivas.</p>
         </div>
 
         {/* Formulário de Login */}
-        <div className="relative animate-dot-border rounded-2xl">
-          <div className="bg-black bg-opacity-70 p-10 rounded-2xl shadow-2xl max-w-md w-full">
+        <div className="relative animate-dot-border rounded-2xl max-w-2xl w-full">
+          <div
+            className="bg-black bg-opacity-70 p-16 rounded-2xl shadow-2xl w-full"
+          >
             <h2 className="text-center text-3xl font-bold text-white mb-8">
               Login
             </h2>
@@ -61,9 +72,15 @@ function Login() {
                 </div>
               </div>
 
+              {error && <p className="text-red-500 text-center">{error}</p>}
+
               <button type="submit" className="w-full py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-md hover:from-purple-600 hover:to-indigo-600 transition-colors">
                 Entrar
               </button>
+
+              <div className="text-center mt-4">
+                <a href="/forgot-password" className="text-purple-300 hover:underline">Esqueceu sua senha?</a>
+              </div>
             </form>
           </div>
         </div>

@@ -13,7 +13,6 @@ interface FormData {
   prazo: string
   solicitante: string
   descricao: string
-  arquivos?: File[]
 }
 
 function NovaSolicitacao() {
@@ -24,7 +23,6 @@ function NovaSolicitacao() {
     prazo: '',
     solicitante: '',
     descricao: '',
-    arquivos: []
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -130,33 +128,6 @@ function NovaSolicitacao() {
             value={formData.descricao}
             onChange={(e) => setFormData(prev => ({ ...prev, descricao: e.target.value }))}
           />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Anexar Arquivos
-          </label>
-          <div className="flex items-center">
-            <label className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-md shadow-sm cursor-pointer hover:bg-blue-600">
-              <span>Escolher arquivos</span>
-              <input
-                type="file"
-                className="hidden"
-                multiple
-                onChange={(e) => {
-                  const files = e.target.files ? Array.from(e.target.files) : []
-                  setFormData(prev => ({ ...prev, arquivos: [...(prev.arquivos || []), ...files] }))
-                }}
-              />
-            </label>
-          </div>
-          {formData.arquivos && formData.arquivos.length > 0 && (
-            <ul className="mt-2 list-disc list-inside text-sm text-gray-500">
-              {formData.arquivos.map((file, index) => (
-                <li key={index}>{file.name}</li>
-              ))}
-            </ul>
-          )}
         </div>
 
         <div className="flex justify-end space-x-4">

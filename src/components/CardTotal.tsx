@@ -1,4 +1,4 @@
-// src/components/StatCard.tsx
+// src/components/CardTotal.tsx
 import { ElementType } from 'react'
 
 interface CardTotalProps {
@@ -19,14 +19,14 @@ export function CardTotal({
   borderClassName = "border-gray-900"
 }: CardTotalProps) {
   return (
-    <div className={`p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow border ${className} ${borderClassName}`}>
-      <div className="flex items-center">
-        <div className={`p-2 rounded-lg ${iconClassName}`}>
-          <Icon className="w-6 h-6 text-gray-900" />
-        </div>
+    <div className={`p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow border ${className} ${borderClassName} flex items-center`}>
+      <div className={`p-2 rounded-lg ${iconClassName} mr-4`}>
+        <Icon className="w-8 h-8 text-gray-900" />
       </div>
-      <p className="mt-4 text-3xl font-semibold text-gray-900">{value}</p>
-      <p className="mt-1 text-sm font-medium text-gray-900">{title}</p>
+      <div>
+        <p className="text-sm font-medium text-gray-900">{title}</p>
+        <p className="text-3xl font-semibold text-gray-900">{value}</p>
+      </div>
     </div>
   )
 }

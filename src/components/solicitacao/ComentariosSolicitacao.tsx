@@ -127,7 +127,7 @@ export function ComentariosSolicitacao({
                 {new Date(comentario.data).toLocaleDateString()}
               </span>
             </div>
-            <p className="mt-2 text-gray-600">{comentario.texto}</p>
+            <p className="mt-2 text-gray-600" dangerouslySetInnerHTML={{ __html: comentario.texto }}></p>
             
             {/* Área de arquivos do comentário */}
             {comentario.arquivos && comentario.arquivos.length > 0 && (

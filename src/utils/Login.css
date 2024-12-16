@@ -1,0 +1,16 @@
+@keyframes dot-border {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.animate-dot-border {
+  background: linear-gradient(270deg, transparent, transparent, rgba(128, 90, 213, 1), transparent, transparent);
+  background-size: 200% 200%;
+  animation: dot-border 3s linear infinite;
+  border-radius: 1rem;
+  padding: 4px; /* Ajuste para criar a borda */
+}

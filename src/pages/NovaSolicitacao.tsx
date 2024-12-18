@@ -1,13 +1,16 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { generateUniqueId } from '../utils/generateId'
-import { formatDate } from '../utils/date'
+import { useAuth } from '../context/AuthContext'
+import { getFirestore, doc, setDoc, updateDoc, arrayUnion, getDoc } from 'firebase/firestore'
+
+const firestore = getFirestore()
 
 type TipoDemanda = 'desenvolvimento' | 'dados'
 type Urgencia = 'baixa' | 'media' | 'alta'
 
 interface FormData {
+  titulo: string
   tipo: TipoDemanda
   urgencia: Urgencia
   prazo: string
@@ -15,12 +18,18 @@ interface FormData {
   descricao: string
 }
 
+function generateRandomId(): string {
+  return Math.floor(1000000 + Math.random() * 9000000).toString(); // Generates a 7-digit random number
+}
+
 function NovaSolicitacao() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [formData, setFormData] = useState<FormData>({
+    titulo: '',
     tipo: 'desenvolvimento',
     urgencia: 'media',
-    prazo: '',
+    prazo: new Date().toISOString().split('T')[0],
     solicitante: '',
     descricao: '',
   })
@@ -28,22 +37,42 @@ function NovaSolicitacao() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    const demandaId = generateRandomId()
     const novaSolicitacao = {
-      ...formData,
-      id: generateUniqueId(),
+      id: demandaId,
+      titulo: formData.titulo,
+      descricao: formData.descricao,
+      prazo: formData.prazo,
+      solicitante: formData.solicitante,
       status: 'pendente',
-      dataCriacao: new Date().toISOString()
+      tipo: formData.tipo,
+      urgencia: formData.urgencia,
+      dataCriacao: new Date().toISOString(),
+      userId: user?.uid
     }
 
     try {
-      // Aqui você implementaria a lógica para salvar no Firebase
-      // await criarDemanda(novaSolicitacao)
+      // Save to Firestore in the 'demandas' collection
+      await setDoc(doc(firestore, 'demandas', demandaId), novaSolicitacao)
       
+      if (user?.uid) {
+        const userRef = doc(firestore, 'usuarios', user.uid)
+        const userDoc = await getDoc(userRef)
+
+        if (!userDoc.exists()) {
+          await setDoc(userRef, { demandas: [] })
+        }
+
+        await updateDoc(userRef, {
+          demandas: arrayUnion(demandaId)
+        })
+      }
+
       toast.success('Solicitação criada com sucesso!')
       navigate('/lista-solicitacoes')
     } catch (error) {
       toast.error('Erro ao criar solicitação')
-      console.error(error)
+      console.error('Erro ao salvar no Firestore:', error)
     }
   }
 
@@ -52,6 +81,18 @@ function NovaSolicitacao() {
       <h1 className="text-4xl font-bold text-gray-800 mb-8 text-center">Nova Solicitação</h1>
       
       <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Título
+          </label>
+          <input
+            type="text"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={formData.titulo}
+            onChange={(e) => setFormData(prev => ({ ...prev, titulo: e.target.value }))}
+          />
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -88,19 +129,9 @@ function NovaSolicitacao() {
             Prazo de Entrega
           </label>
           <input
-            type="text"
-            placeholder="00/00/0000"
+            type="date"
             className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={formData.prazo ? formatDate(formData.prazo) : ''}
-            onFocus={(e) => {
-              e.target.type = 'date'
-              e.target.showPicker()
-            }}
-            onBlur={(e) => {
-              if (!e.target.value) {
-                e.target.type = 'text'
-              }
-            }}
+            value={formData.prazo}
             onChange={(e) => setFormData(prev => ({ ...prev, prazo: e.target.value }))}
             min={new Date().toISOString().split('T')[0]}
           />

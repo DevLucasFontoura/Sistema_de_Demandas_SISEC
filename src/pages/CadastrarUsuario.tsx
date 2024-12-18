@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { addDoc, collection } from 'firebase/firestore'
+import { doc, setDoc } from 'firebase/firestore'
 import { createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth'
 import { db, auth } from '../services/firebaseConfig' // Certifique-se de que o caminho está correto
 
@@ -25,11 +25,13 @@ function CadastrarUsuario() {
       const userCredential = await createUserWithEmailAndPassword(auth, usuario.email, 'senha-temporaria')
       const uid = userCredential.user.uid
 
-      // Salva o usuário no Firestore com o UID
-      const usuariosCollection = collection(db, 'usuarios')
-      await addDoc(usuariosCollection, {
-        uid,
-        ...usuario,
+      // Salva o usuário no Firestore com o UID como nome do documento e como um campo
+      const userDocRef = doc(db, 'usuarios', uid)
+      await setDoc(userDocRef, {
+        uid, // Save the UID as a field in the document
+        nome: usuario.nome,
+        email: usuario.email,
+        tipo: usuario.tipo,
         demandas: [] // Inicializa o array de demandas vazio
       })
 

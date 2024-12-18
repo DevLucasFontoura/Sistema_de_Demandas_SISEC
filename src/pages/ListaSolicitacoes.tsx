@@ -6,8 +6,20 @@ import {
   ExclamationTriangleIcon,
   MagnifyingGlassIcon 
 } from '@heroicons/react/24/outline'
-import { Demanda } from '../services/demandas'
+import { getFirestore, collection, getDocs } from 'firebase/firestore'
 import { formatDate } from '../utils/date'
+
+const firestore = getFirestore()
+
+interface Demanda {
+  id: string
+  solicitante: string
+  tipo: 'desenvolvimento' | 'dados'
+  urgencia: 'baixa' | 'media' | 'alta'
+  status: 'pendente' | 'em_andamento' | 'concluida'
+  prazo: string
+  responsavel: string
+}
 
 export function StatusBadge({ status }: { status: Demanda['status'] }) {
   const styles = {
@@ -59,7 +71,20 @@ function ListaSolicitacoes() {
   const [filteredSolicitacoes, setFilteredSolicitacoes] = useState<Demanda[]>([])
 
   useEffect(() => {
-    // Filtra as solicitações com base no ID de busca
+    const fetchSolicitacoes = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(firestore, 'demandas'))
+        const demandasList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Demanda[]
+        setSolicitacoes(demandasList)
+      } catch (error) {
+        console.error('Erro ao buscar solicitações:', error)
+      }
+    }
+
+    fetchSolicitacoes()
+  }, [])
+
+  useEffect(() => {
     const filtered = searchId
       ? solicitacoes.filter(s => s.id.includes(searchId))
       : solicitacoes
@@ -141,7 +166,7 @@ function ListaSolicitacoes() {
                       solicitacao.urgencia === 'media' ? 'bg-yellow-100 text-yellow-800' : 
                       'bg-green-100 text-green-800'}`}
                   >
-                    {solicitacao.urgencia.charAt(0).toUpperCase() + solicitacao.urgencia.slice(1)}
+                    {solicitacao.urgencia ? solicitacao.urgencia.charAt(0).toUpperCase() + solicitacao.urgencia.slice(1) : 'N/A'}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -150,14 +175,14 @@ function ListaSolicitacoes() {
                       solicitacao.status === 'em_andamento' ? 'bg-blue-100 text-blue-800' : 
                       'bg-green-100 text-green-800'}`}
                   >
-                    {solicitacao.status.charAt(0).toUpperCase() + solicitacao.status.slice(1)}
+                    {solicitacao.status ? solicitacao.status.charAt(0).toUpperCase() + solicitacao.status.slice(1) : 'N/A'}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {formatDate(solicitacao.prazo)}
+                  {solicitacao.prazo ? formatDate(solicitacao.prazo) : 'N/A'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {solicitacao.responsavel}
+                  {solicitacao.responsavel || 'N/A'}
                 </td>
               </tr>
             ))}

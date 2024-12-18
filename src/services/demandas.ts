@@ -1,5 +1,5 @@
 import { collection, addDoc, getDocs, query, orderBy, Timestamp } from '@firebase/firestore'
-import { db } from './firebase'
+import { db } from './firebaseConfig'
 
 export interface Demanda {
   id: string

@@ -1,20 +1,29 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { HomeIcon, PlusCircleIcon, ClipboardDocumentListIcon, ArrowLeftOnRectangleIcon } from '@heroicons/react/24/outline'
+import { HomeIcon, PlusCircleIcon, ClipboardDocumentListIcon, ArrowLeftOnRectangleIcon, UserPlusIcon } from '@heroicons/react/24/outline'
+import { useAuth } from '../context/AuthContext'
 
 function Sidebar() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { logout } = useAuth()
 
   const menuItems = [
     { path: '/dashboard', icon: HomeIcon, label: 'Dashboard' },
     { path: '/nova-solicitacao', icon: PlusCircleIcon, label: 'Nova Solicitação' },
     { path: '/lista-solicitacoes', icon: ClipboardDocumentListIcon, label: 'Solicitações' },
+    { path: '/cadastrar-usuario', icon: UserPlusIcon, label: 'Cadastrar Usuário' },
+    { path: '/lista-usuarios', icon: UserPlusIcon, label: 'Lista de Usuários' },
   ]
 
   const isActive = (path: string) => location.pathname === path
 
-  const handleLogout = () => {
-    navigate('/login')
+  const handleLogout = async () => {
+    try {
+      await logout()
+      navigate('/login')
+    } catch (error) {
+      console.error('Erro ao deslogar:', error)
+    }
   }
 
   return (

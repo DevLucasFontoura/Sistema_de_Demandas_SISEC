@@ -4,12 +4,12 @@ import { getAuth } from '@firebase/auth'
 
 const firebaseConfig = {
   // Substitua com suas configurações do Firebase
-  apiKey: "sua-api-key",
-  authDomain: "seu-auth-domain",
-  projectId: "seu-project-id",
-  storageBucket: "seu-storage-bucket",
-  messagingSenderId: "seu-messaging-sender-id",
-  appId: "seu-app-id"
+  apiKey: "AIzaSyCKI4GJzcQM6-mDjd4tbhQlMFiOvewBnnA",
+  authDomain: "demandasisec.firebaseapp.com",
+  projectId: "demandasisec",
+  storageBucket: "demandasisec.firebasestorage.app",
+  messagingSenderId: "456815001758",
+  appId: "1:456815001758:web:4eb594a648eb48cf0fbb8f",
 }
 
 const app = initializeApp(firebaseConfig)

@@ -1,23 +1,47 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
+import { useAuth } from '../context/AuthContext'
 import '../utils/Login.css'
 
 function Login() {
   const navigate = useNavigate()
+  const { login, userType, loading } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Efeito para redirecionar quando o userType mudar
+  useEffect(() => {
+    console.log('Login useEffect - userType:', userType, 'loading:', loading)
+    if (userType && !loading) {
+      console.log('Redirecionando para dashboard...')
+      navigate('/dashboard', { replace: true })
+    }
+  }, [userType, loading, navigate])
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!email || !password) {
       setError('Por favor, preencha todos os campos.')
       return
     }
-    setError('')
-    toast.success('Bem-vindo ao sistema!')
-    navigate('/dashboard')
+
+    try {
+      console.log('Iniciando login...')
+      await login(email, password)
+      toast.success('Bem-vindo ao sistema!')
+      // Removemos o navigate daqui, pois o useEffect cuidará do redirecionamento
+    } catch (error) {
+      console.error('Erro no login:', error)
+      setError('Erro ao fazer login. Verifique suas credenciais.')
+      toast.error('Erro ao fazer login')
+    }
+  }
+
+  // Se já estiver autenticado, redireciona
+  if (userType && !loading) {
+    return null // ou um componente de loading se preferir
   }
 
   return (
@@ -31,19 +55,13 @@ function Login() {
         </h2>
       </header>
       <div className="flex flex-1 justify-center items-center space-x-24">
-        
-        {/* Explicação do Sistema */}
         <div className="text-white text-2xl space-y-6 max-w-md">
           <p>Otimize a gestão de tarefas e melhore a eficiência da equipe.</p>
           <p>Monitore o progresso em tempo real e colabore de forma eficaz.</p>
           <p>Alcance seus objetivos com soluções integradas e intuitivas.</p>
         </div>
-
-        {/* Formulário de Login */}
         <div className="relative animate-dot-border rounded-2xl max-w-2xl w-full">
-          <div
-            className="bg-black bg-opacity-70 p-16 rounded-2xl shadow-2xl w-full"
-          >
+          <div className="bg-black bg-opacity-70 p-16 rounded-2xl shadow-2xl w-full">
             <h2 className="text-center text-3xl font-bold text-white mb-8">
               Login
             </h2>
@@ -59,7 +77,6 @@ function Login() {
                     placeholder="Email"
                   />
                 </div>
-                
                 <div>
                   <input
                     id="password"
@@ -71,15 +88,17 @@ function Login() {
                   />
                 </div>
               </div>
-
               {error && <p className="text-red-500 text-center">{error}</p>}
-
-              <button type="submit" className="w-full py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-md hover:from-purple-600 hover:to-indigo-600 transition-colors">
+              <button 
+                type="submit" 
+                className="w-full py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-md hover:from-purple-600 hover:to-indigo-600 transition-colors"
+              >
                 Entrar
               </button>
-
               <div className="text-center mt-4">
-                <a href="/forgot-password" className="text-purple-300 hover:underline">Esqueceu sua senha?</a>
+                <a href="/forgot-password" className="text-purple-300 hover:underline">
+                  Esqueceu sua senha?
+                </a>
               </div>
             </form>
           </div>

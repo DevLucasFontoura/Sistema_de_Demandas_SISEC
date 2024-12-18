@@ -1,7 +1,7 @@
 // src/pages/DetalhesDaSolicitacao.tsx
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { getFirestore, doc, getDoc } from 'firebase/firestore'
+import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore'
 import { DetalhesSolicitacao } from '../components/solicitacao/DetalhesSolicitacao'
 import type { Solicitacao } from '../components/solicitacao/DetalhesSolicitacao'
 import toast from 'react-hot-toast'
@@ -17,7 +17,7 @@ interface Solicitacao {
   prazo: string
   descricao: string
   titulo: string
-  // Add other fields as necessary
+  responsavel?: string // Add other fields as necessary
 }
 
 function DetalhesDaSolicitacaoPage() {
@@ -53,12 +53,22 @@ function DetalhesDaSolicitacaoPage() {
     fetchSolicitacao()
   }, [id])
 
-  const handleSave = (updatedSolicitacao: Solicitacao) => {
-    setSolicitacao(updatedSolicitacao)
-    toast.success('Solicitação atualizada com sucesso!')
-    // Aqui você pode adicionar a lógica para salvar no backend
-    // Por exemplo:
-    // await updateSolicitacaoNoFirebase(updatedSolicitacao)
+  const handleSave = async (updatedSolicitacao: Solicitacao) => {
+    try {
+      if (!id) {
+        toast.error('ID da solicitação não fornecido.')
+        return
+      }
+
+      const docRef = doc(firestore, 'demandas', id)
+      await updateDoc(docRef, updatedSolicitacao)
+
+      setSolicitacao(updatedSolicitacao)
+      toast.success('Solicitação atualizada com sucesso!')
+    } catch (error) {
+      toast.error('Erro ao atualizar solicitação.')
+      console.error('Erro ao atualizar solicitação:', error)
+    }
   }
 
   const handleComplete = () => {
@@ -82,6 +92,7 @@ function DetalhesDaSolicitacaoPage() {
         <p>Carregando...</p>
       ) : solicitacao ? (
         <div>
+          <h1 className="text-2xl font-bold mb-4">{solicitacao.titulo}</h1>
           <DetalhesSolicitacao 
             solicitacao={{
               ...solicitacao,

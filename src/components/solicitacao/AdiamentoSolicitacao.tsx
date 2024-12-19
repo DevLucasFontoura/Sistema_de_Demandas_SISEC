@@ -1,5 +1,6 @@
 // src/components/solicitacao/AdiamentoSolicitacao.tsx
 import { useState } from 'react'
+import { useAuth } from '../../context/AuthContext'
 
 interface AdiamentoProps {
   onAdiar: (novoPrazo: string, justificativa: string) => void
@@ -9,6 +10,8 @@ export function AdiamentoSolicitacao({ onAdiar }: AdiamentoProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [novoPrazo, setNovoPrazo] = useState('')
   const [justificativa, setJustificativa] = useState('')
+  const { user } = useAuth()
+  const isAdmin = user?.role === 'adm' || user?.role === 'equipe_ti'
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -19,6 +22,8 @@ export function AdiamentoSolicitacao({ onAdiar }: AdiamentoProps) {
       setJustificativa('')
     }
   }
+
+  if (!isAdmin) return null
 
   return (
     <div>

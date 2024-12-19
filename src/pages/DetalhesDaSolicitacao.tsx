@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { getFirestore, doc, getDoc, updateDoc, collection, addDoc, getDocs } from 'firebase/firestore'
+import { getFirestore, doc, getDoc, updateDoc, collection, addDoc, getDocs, deleteField } from 'firebase/firestore'
 import { DetalhesSolicitacao } from '../components/solicitacao/DetalhesSolicitacao'
 import type { Solicitacao } from '../components/solicitacao/DetalhesSolicitacao'
 import toast from 'react-hot-toast'
@@ -27,6 +27,7 @@ function DetalhesDaSolicitacaoPage() {
   const [solicitacao, setSolicitacao] = useState<Solicitacao | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [comentarios, setComentarios] = useState<Comentario[]>([])
+  const isAdmin = user?.role === 'adm' || user?.role === 'ti'
 
   const fetchSolicitacao = async () => {
     try {
@@ -123,6 +124,25 @@ function DetalhesDaSolicitacaoPage() {
     }
   }
 
+  const handleDeleteComentario = async (comentarioId: string) => {
+    try {
+      if (!id) return;
+
+      const docRef = doc(firestore, 'demandas', id);
+      
+      // Remove o comentário do map
+      await updateDoc(docRef, {
+        [`comentarios.${comentarioId}`]: deleteField()
+      });
+
+      toast.success('Comentário excluído com sucesso!');
+      await fetchSolicitacao(); // Recarrega os comentários
+    } catch (error) {
+      console.error('Erro ao excluir comentário:', error);
+      toast.error('Erro ao excluir comentário.');
+    }
+  };
+
   useEffect(() => {
     if (id) {
       fetchSolicitacao();
@@ -162,39 +182,22 @@ function DetalhesDaSolicitacaoPage() {
     }
   }
 
-  const isUserAdminOrIT = user?.role === 'admin' || user?.role === 'ti'
-  console.log('User role:', user?.role)
-
   return (
-    <div className="p-6">
-      {loading ? (
-        <p>Carregando...</p>
-      ) : solicitacao ? (
+    <div className="container mx-auto px-4 py-8">
+      {solicitacao ? (
         <div>
-          <h1 className="text-2xl font-bold mb-4">{solicitacao.titulo}</h1>
-          <DetalhesSolicitacao 
-            solicitacao={{
-              ...solicitacao,
-              tipo: solicitacao.tipo.charAt(0).toUpperCase() + solicitacao.tipo.slice(1)
-            }}
-            onSave={handleSave}
-            onComplete={handleComplete}
-          />
-          {isUserAdminOrIT && (
-            <div className="flex space-x-4 mt-4">
-              <button className="px-4 py-2 bg-gray-200 rounded">Editar</button>
-              <button onClick={handleComplete} className="px-4 py-2 bg-blue-500 text-white rounded">
-                Marcar como Concluída
-              </button>
-              <button className="px-4 py-2 bg-yellow-500 text-white rounded">
-                Solicitar Adiamento
-              </button>
-            </div>
-          )}
+          <h1 className="text-3xl font-bold mb-6">{solicitacao.titulo}</h1>
           
+          {/* Informações da solicitação - visível para todos */}
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <DetalhesSolicitacao solicitacao={solicitacao} />
+          </div>
+          
+          {/* Comentários - visível para todos */}
           <ComentariosSolicitacao
             comentarios={comentarios}
             onAddComentario={handleAddComentario}
+            onDeleteComentario={handleDeleteComentario}
             className="mt-6"
           />
         </div>

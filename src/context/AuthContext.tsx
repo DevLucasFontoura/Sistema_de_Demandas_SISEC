@@ -1,77 +1,87 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth'
 import { auth } from '../services/firebaseConfig'
+import { User } from 'firebase/auth'
+import { doc, getDoc, getFirestore } from 'firebase/firestore'
 
 interface AuthContextType {
-  user: any
-  userType: string | null
+  user: User & { role?: string } | null
   loading: boolean
   login: (email: string, password: string) => Promise<void>
+  userType: string | undefined
   logout: () => Promise<void>
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
+const AuthContext = createContext<AuthContextType>({ 
+  user: null, 
+  loading: true,
+  login: async () => {},
+  userType: undefined,
+  logout: async () => {}
+})
 
 interface AuthProviderProps {
   children: ReactNode
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<any>(null)
-  const [userType, setUserType] = useState<string | null>(null)
-  const [loading, setLoading] = useState<boolean>(true)
+  const [user, setUser] = useState<User & { role?: string } | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [userType, setUserType] = useState<string>()
+  const firestore = getFirestore()
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      console.log('AuthStateChanged: user:', user)
-      setUser(user)
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        setUserType('normal') // Replace with actual logic to determine userType
+        const userDoc = await getDoc(doc(firestore, 'usuarios', user.uid))
+        const userData = userDoc.data()
+        setUser({ ...user, role: userData?.tipo })
+        setUserType(userData?.tipo)
       } else {
-        setUserType(null)
+        setUser(null)
+        setUserType(undefined)
       }
       setLoading(false)
     })
-    return unsubscribe
-  }, [])
+
+    return () => unsubscribe()
+  }, [firestore])
 
   const login = async (email: string, password: string) => {
-    setLoading(true)
     try {
-      await signInWithEmailAndPassword(auth, email, password)
+      const userCredential = await signInWithEmailAndPassword(auth, email, password)
+      const userDoc = await getDoc(doc(firestore, 'usuarios', userCredential.user.uid))
+      const userData = userDoc.data()
+      
+      setUser({
+        ...userCredential.user,
+        role: userData?.tipo
+      })
+      setUserType(userData?.tipo)
+      
+      console.log('Login successful, user:', userCredential.user.uid, 'role:', userData?.tipo)
     } catch (error) {
-      console.error('Erro ao fazer login:', error)
+      console.error('Error during login:', error)
       throw error
-    } finally {
-      setLoading(false)
     }
   }
 
   const logout = async () => {
-    setLoading(true)
     try {
       await signOut(auth)
       setUser(null)
-      setUserType(null)
+      setUserType(undefined)
     } catch (error) {
-      console.error('Erro ao fazer logout:', error)
+      console.error('Error during logout:', error)
       throw error
-    } finally {
-      setLoading(false)
     }
   }
 
   return (
-    <AuthContext.Provider value={{ user, userType, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, userType, logout }}>
       {children}
     </AuthContext.Provider>
   )
 }
 
-export const useAuth = () => {
-  const context = useContext(AuthContext)
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider')
-  }
-  return context
-} 
+export const useAuth = () => useContext(AuthContext) 

@@ -5,15 +5,24 @@ import { useAuth } from '../context/AuthContext'
 function Sidebar() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { logout } = useAuth()
+  const { logout, user } = useAuth()
+  const isAdmin = user?.role === 'adm' || user?.role === 'equipe_ti'
 
-  const menuItems = [
+  // Menu items básicos para todos os usuários
+  const baseMenuItems = [
     { path: '/dashboard', icon: HomeIcon, label: 'Dashboard' },
     { path: '/nova-solicitacao', icon: PlusCircleIcon, label: 'Nova Solicitação' },
     { path: '/lista-solicitacoes', icon: ClipboardDocumentListIcon, label: 'Solicitações' },
+  ]
+
+  // Menu items apenas para administradores
+  const adminMenuItems = [
     { path: '/cadastrar-usuario', icon: UserPlusIcon, label: 'Cadastrar Usuário' },
     { path: '/lista-usuarios', icon: UserPlusIcon, label: 'Lista de Usuários' },
   ]
+
+  // Combina os menus baseado na role do usuário
+  const menuItems = isAdmin ? [...baseMenuItems, ...adminMenuItems] : baseMenuItems
 
   const isActive = (path: string) => location.pathname === path
 

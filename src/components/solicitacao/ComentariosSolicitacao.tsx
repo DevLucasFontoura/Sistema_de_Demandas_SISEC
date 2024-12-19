@@ -1,6 +1,7 @@
 // src/components/solicitacao/ComentariosSolicitacao.tsx
 import { useState, useRef } from 'react'
-import { PaperClipIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
+import { PaperClipIcon, ArrowDownTrayIcon, TrashIcon } from '@heroicons/react/24/outline'
+import { useAuth } from '../../context/AuthContext'
 
 interface Arquivo {
   id: string
@@ -20,14 +21,23 @@ interface Comentario {
 interface ComentariosSolicitacaoProps {
   comentarios: Comentario[]
   onAddComentario: (texto: string, arquivos?: File[]) => void
+  onDeleteComentario?: (comentarioId: string) => void
   className?: string
 }
 
 export function ComentariosSolicitacao({
   comentarios,
   onAddComentario,
+  onDeleteComentario,
   className = '',
 }: ComentariosSolicitacaoProps) {
+  const { user } = useAuth()
+  const isAdmin = user?.role === 'adm' || user?.role === 'ti'
+  
+  console.log('User role:', user?.role) // Debug
+  console.log('Is admin:', isAdmin) // Debug
+  console.log('onDeleteComentario exists:', !!onDeleteComentario) // Debug
+
   const [novoComentario, setNovoComentario] = useState('')
   const [arquivosSelecionados, setArquivosSelecionados] = useState<File[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -60,7 +70,7 @@ export function ComentariosSolicitacao({
   }
 
   return (
-    <div className={`mt-8 bg-white rounded-lg shadow-md p-6 ${className}`}>
+    <div className={`mt-8 bg-white rounded-lg shadow-md p-6 border border-black ${className}`}>
       <h3 className="text-lg font-semibold text-gray-800 mb-4">Comentários</h3>
       
       <form onSubmit={handleSubmit} className="mb-6">
@@ -94,14 +104,14 @@ export function ComentariosSolicitacao({
         )}
 
         <div className="mt-4 flex items-center space-x-4">
-          <button
+          {/* <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
           >
             <PaperClipIcon className="h-5 w-5 mr-2" />
             Anexar Arquivo
-          </button>
+          </button> */}
           <input
             ref={fileInputRef}
             type="file"
@@ -122,10 +132,21 @@ export function ComentariosSolicitacao({
         {comentarios.map((comentario) => (
           <div key={comentario.id} className="bg-gray-50 rounded-lg p-4">
             <div className="flex justify-between items-start">
-              <span className="font-medium text-gray-800">{comentario.autor}</span>
-              <span className="text-sm text-gray-500">
-                {new Date(comentario.data).toLocaleDateString()}
-              </span>
+              <div className="flex-grow">
+                <span className="font-medium text-gray-800">{comentario.autor}</span>
+                <span className="text-sm text-gray-500 ml-2">
+                  {new Date(comentario.data).toLocaleDateString()}
+                </span>
+              </div>
+              {isAdmin && onDeleteComentario && (
+                <button
+                  onClick={() => onDeleteComentario(comentario.id)}
+                  className="text-red-500 hover:text-red-700 p-1"
+                  title="Excluir comentário"
+                >
+                  <TrashIcon className="h-5 w-5" />
+                </button>
+              )}
             </div>
             <p className="mt-2 text-gray-600" dangerouslySetInnerHTML={{ __html: comentario.texto }}></p>
             

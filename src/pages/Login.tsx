@@ -6,19 +6,17 @@ import '../utils/Login.css'
 
 function Login() {
   const navigate = useNavigate()
-  const { login, userType, loading } = useAuth()
+  const { login, user, loading } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
 
-  // Efeito para redirecionar quando o userType mudar
   useEffect(() => {
-    console.log('Login useEffect - userType:', userType, 'loading:', loading)
-    if (userType && !loading) {
-      console.log('Redirecionando para dashboard...')
-      navigate('/dashboard', { replace: true })
+    console.log('Login useEffect - user:', user, 'loading:', loading)
+    if (user && !loading) {
+      navigate('/dashboard')
     }
-  }, [userType, loading, navigate])
+  }, [user, loading, navigate])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -30,18 +28,12 @@ function Login() {
     try {
       console.log('Iniciando login...')
       await login(email, password)
-      toast.success('Bem-vindo ao sistema!')
-      // Removemos o navigate daqui, pois o useEffect cuidará do redirecionamento
+      toast.success('Login realizado com sucesso!')
     } catch (error) {
       console.error('Erro no login:', error)
       setError('Erro ao fazer login. Verifique suas credenciais.')
       toast.error('Erro ao fazer login')
     }
-  }
-
-  // Se já estiver autenticado, redireciona
-  if (userType && !loading) {
-    return null // ou um componente de loading se preferir
   }
 
   return (

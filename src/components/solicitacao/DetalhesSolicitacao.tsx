@@ -305,11 +305,11 @@ export function DetalhesSolicitacao({
         </div>
       </div>
 
-      <ComentariosSolicitacao
+      {/* <ComentariosSolicitacao
         comentarios={solicitacao.comentarios || []}
         onAddComentario={handleAddComentario}
         className="bg-white border border-gray-900 rounded-lg p-6"
-      />
+      /> */}
     </div>
   )
 }

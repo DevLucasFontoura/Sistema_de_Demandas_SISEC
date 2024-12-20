@@ -36,7 +36,6 @@ function DetalhesDaSolicitacaoPage() {
         return
       }
 
-      console.log('Buscando solicitação e comentários...')
       const docRef = doc(firestore, 'demandas', id)
       const docSnap = await getDoc(docRef)
 
@@ -44,25 +43,54 @@ function DetalhesDaSolicitacaoPage() {
         const data = docSnap.data()
         setSolicitacao({ id: docSnap.id, ...data } as Solicitacao)
         
+        // Processa os comentários
         const comentariosMap = data.comentarios || {}
-        const comentariosArray = Object.entries(comentariosMap).map(([id, comentario]: [string, any]) => ({
-          id,
-          texto: comentario.mensagem,
-          autor: comentario.autor,
-          data: new Date(comentario.dataCriacao),
-          arquivos: comentario.arquivos || []
-        })).sort((a, b) => b.data.getTime() - a.data.getTime())
+        const comentariosArray = Object.entries(comentariosMap).map(([id, comentario]: [string, any]) => {
+          if (comentario.tipo === 'adiamento' && comentario.novoPrazo) {
+            // Formata as datas para o formato desejado
+            const mensagemPartes = comentario.mensagem.split('Justificativa:')
+            const justificativa = mensagemPartes[1]?.trim() || ''
+
+            // Extrai as datas da mensagem original
+            const regex = /de (\d{2}\/\d{2}\/\d{4}) para (\d{2}\/\d{2}\/\d{4})/
+            const match = comentario.mensagem.match(regex)
+            
+            let texto = comentario.mensagem
+            if (match) {
+              const [_, dataAntiga, dataNova] = match
+              texto = `Solicitação de adiamento de ${dataAntiga} para ${dataNova}.\nJustificativa: ${justificativa}`
+            }
+
+            return {
+              id,
+              texto,
+              autor: comentario.autor,
+              data: new Date(comentario.dataCriacao),
+              tipo: comentario.tipo,
+              novoPrazo: comentario.novoPrazo,
+              arquivos: comentario.arquivos || []
+            }
+          }
+          
+          // Para comentários normais
+          return {
+            id,
+            texto: comentario.mensagem,
+            autor: comentario.autor,
+            data: new Date(comentario.dataCriacao),
+            tipo: comentario.tipo || 'comentario',
+            novoPrazo: comentario.novoPrazo,
+            arquivos: comentario.arquivos || []
+          }
+        }).sort((a, b) => b.data.getTime() - a.data.getTime())
         
-        console.log('Comentários carregados:', comentariosArray)
         setComentarios(comentariosArray)
       } else {
         toast.error('Solicitação não encontrada.')
       }
     } catch (error) {
-      toast.error('Erro ao buscar solicitação.')
       console.error('Erro ao buscar solicitação:', error)
-    } finally {
-      setLoading(false)
+      toast.error('Erro ao buscar solicitação.')
     }
   }
 
@@ -143,6 +171,62 @@ function DetalhesDaSolicitacaoPage() {
     }
   };
 
+  const handleAdiarSolicitacao = async (novoPrazo: string, justificativa: string) => {
+    try {
+      if (!id || !user) {
+        toast.error('Erro ao adicionar adiamento.')
+        return
+      }
+
+      // Busca os dados do usuário no Firestore
+      const userDocRef = doc(firestore, 'usuarios', user.uid)
+      const userDoc = await getDoc(userDocRef)
+      const userData = userDoc.data()
+
+      // Busca a solicitação atual
+      const solicitacaoRef = doc(firestore, 'demandas', id)
+      const solicitacaoDoc = await getDoc(solicitacaoRef)
+      
+      if (!solicitacaoDoc.exists()) {
+        toast.error('Solicitação não encontrada.')
+        return
+      }
+
+      const solicitacaoData = solicitacaoDoc.data()
+      
+      // Formata as datas para DD / MM / YYYY
+      const prazoAtual = solicitacaoData.prazo
+      const [anoAtual, mesAtual, diaAtual] = prazoAtual.split('-')
+      const dataAnteriorFormatada = `${diaAtual} / ${mesAtual} / ${anoAtual}`
+      
+      const [anoNovo, mesNovo, diaNovo] = novoPrazo.split('-')
+      const dataNovaFormatada = `${diaNovo} / ${mesNovo} / ${anoNovo}`
+
+      const comentarioId = Date.now().toString()
+      const novoAdiamento = {
+        autor: userData?.nome || 'Usuário',
+        userId: user.uid,
+        mensagem: `Solicitação de adiamento de ${dataAnteriorFormatada} para ${dataNovaFormatada}.\nJustificativa: ${justificativa}`,
+        dataCriacao: new Date().toISOString(),
+        tipo: 'adiamento',
+        novoPrazo,
+        arquivos: []
+      }
+
+      // Atualiza o documento
+      await updateDoc(solicitacaoRef, {
+        prazo: novoPrazo,
+        [`comentarios.${comentarioId}`]: novoAdiamento
+      })
+
+      toast.success('Adiamento solicitado com sucesso!')
+      await fetchSolicitacao()
+    } catch (error) {
+      console.error('Erro ao solicitar adiamento:', error)
+      toast.error('Erro ao solicitar adiamento.')
+    }
+  }
+
   useEffect(() => {
     if (id) {
       fetchSolicitacao();
@@ -188,16 +272,21 @@ function DetalhesDaSolicitacaoPage() {
         <div>
           <h1 className="text-3xl font-bold mb-6">{solicitacao.titulo}</h1>
           
-          {/* Informações da solicitação - visível para todos */}
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <DetalhesSolicitacao solicitacao={solicitacao} />
           </div>
           
-          {/* Comentários - visível para todos */}
           <ComentariosSolicitacao
             comentarios={comentarios}
             onAddComentario={handleAddComentario}
             onDeleteComentario={handleDeleteComentario}
+            onAdiarSolicitacao={async (novoPrazo, justificativa) => {
+              console.log('DetalhesDaSolicitacao: Chamando handleAdiarSolicitacao', {
+                novoPrazo,
+                justificativa
+              })
+              await handleAdiarSolicitacao(novoPrazo, justificativa)
+            }}
             className="mt-6"
           />
         </div>

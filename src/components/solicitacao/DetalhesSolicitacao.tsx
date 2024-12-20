@@ -123,22 +123,36 @@ export function DetalhesSolicitacao({
       adiamentos: [...(prev.adiamentos || []), novoAdiamento]
     }))
 
-    // Adiciona um comentário sobre o adiamento
+    // Formata a data para DD / MM / YYYY
+    const [ano, mes, dia] = novoPrazo.split('-')
+    const dataPrazoFormatada = `${dia} / ${mes} / ${ano}`
+
+    // Adiciona um comentário sobre o adiamento com o novo formato
     const comentarioAdiamento: Comentario = {
       id: Date.now().toString(),
-      texto: `<strong>Prazo Adiado:</strong> ${formatDate(novoPrazo)}<br/><strong>Justificativa:</strong> ${justificativa}`,
-      autor: "Sistema", // Ou o nome do usuário atual
+      texto: `Solicitação de adiamento para ${dataPrazoFormatada}\nJustificativa: ${justificativa}`,
+      autor: "Sistema",
       data: new Date(),
       arquivos: []
     }
 
-    setSolicitacao(prev => ({
-      ...prev,
-      comentarios: [...(prev.comentarios || []), comentarioAdiamento]
-    }))
+    setSolicitacao(prev => {
+      const comentariosAtuais = prev.comentarios || {}
+      return {
+        ...prev,
+        comentarios: {
+          ...comentariosAtuais,
+          [comentarioAdiamento.id]: {
+            mensagem: comentarioAdiamento.texto,
+            autor: comentarioAdiamento.autor,
+            dataCriacao: comentarioAdiamento.data.toISOString(),
+            arquivos: comentarioAdiamento.arquivos
+          }
+        }
+      }
+    })
 
     toast.success('Prazo atualizado com sucesso!')
-    // Aqui você pode adicionar a lógica para salvar no Firebase
   }
 
   return (

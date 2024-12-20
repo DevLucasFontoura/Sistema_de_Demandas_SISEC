@@ -11,15 +11,32 @@ export function AdiamentoSolicitacao({ onAdiar }: AdiamentoProps) {
   const [novoPrazo, setNovoPrazo] = useState('')
   const [justificativa, setJustificativa] = useState('')
   const { user } = useAuth()
-  const isAdmin = user?.role === 'adm' || user?.role === 'equipe_ti'
+  const isAdmin = user?.role === 'adm' || user?.role === 'ti'
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (novoPrazo && justificativa) {
+    console.log('Tentando submeter adiamento:', { novoPrazo, justificativa })
+
+    if (!novoPrazo) {
+      console.error('Novo prazo não informado')
+      return
+    }
+
+    if (!justificativa) {
+      console.error('Justificativa não informada')
+      return
+    }
+
+    try {
+      console.log('Chamando onAdiar com:', { novoPrazo, justificativa })
       onAdiar(novoPrazo, justificativa)
+      console.log('onAdiar chamado com sucesso')
+      
       setIsOpen(false)
       setNovoPrazo('')
       setJustificativa('')
+    } catch (error) {
+      console.error('Erro ao chamar onAdiar:', error)
     }
   }
 
@@ -29,14 +46,20 @@ export function AdiamentoSolicitacao({ onAdiar }: AdiamentoProps) {
     <div>
       {!isOpen ? (
         <button
-          onClick={() => setIsOpen(true)}
+          onClick={() => {
+            console.log('Abrindo modal de adiamento')
+            setIsOpen(true)
+          }}
           className="px-3 py-1.5 text-sm bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors"
         >
           Solicitar Adiamento
         </button>
       ) : (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 max-w-md w-full mx-4">
+          <form 
+            onSubmit={handleSubmit} 
+            className="bg-white rounded-lg shadow-md p-6 max-w-md w-full mx-4"
+          >
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Solicitar Adiamento</h3>
             
             <div className="space-y-4">
@@ -47,9 +70,13 @@ export function AdiamentoSolicitacao({ onAdiar }: AdiamentoProps) {
                 <input
                   type="date"
                   value={novoPrazo}
-                  onChange={(e) => setNovoPrazo(e.target.value)}
+                  onChange={(e) => {
+                    console.log('Novo prazo selecionado:', e.target.value)
+                    setNovoPrazo(e.target.value)
+                  }}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
                   min={new Date().toISOString().split('T')[0]}
+                  required
                 />
               </div>
 
@@ -59,9 +86,12 @@ export function AdiamentoSolicitacao({ onAdiar }: AdiamentoProps) {
                 </label>
                 <textarea
                   value={justificativa}
-                  onChange={(e) => setJustificativa(e.target.value)}
+                  onChange={(e) => {
+                    setJustificativa(e.target.value)
+                  }}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
                   rows={3}
+                  required
                 />
               </div>
 

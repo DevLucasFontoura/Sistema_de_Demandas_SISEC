@@ -4,10 +4,14 @@ import {
   ClockIcon, 
   CheckCircleIcon,
   ExclamationTriangleIcon,
-  MagnifyingGlassIcon 
+  MagnifyingGlassIcon,
+  TrashIcon
 } from '@heroicons/react/24/outline'
-import { getFirestore, collection, getDocs } from 'firebase/firestore'
+import { getFirestore, collection, getDocs, deleteDoc, doc } from 'firebase/firestore'
 import { formatDate } from '../utils/date'
+import { useAuth } from '../context/AuthContext'
+import { toast } from 'react-hot-toast'
+import Swal from 'sweetalert2'
 
 const firestore = getFirestore()
 
@@ -65,6 +69,8 @@ export function UrgenciaBadge({ urgencia }: { urgencia: Demanda['urgencia'] }) {
 }
 
 function ListaSolicitacoes() {
+  const { user } = useAuth()
+  const isAdmin = user?.role === 'adm' || user?.role === 'equipe_ti'
   const navigate = useNavigate()
   const [searchId, setSearchId] = useState('')
   const [solicitacoes, setSolicitacoes] = useState<Demanda[]>([])
@@ -90,6 +96,73 @@ function ListaSolicitacoes() {
       : solicitacoes
     setFilteredSolicitacoes(filtered)
   }, [searchId, solicitacoes])
+
+  const handleDelete = async (id: string) => {
+    const result = await Swal.fire({
+      title: 'Tem certeza?',
+      text: "Você não poderá reverter esta ação!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sim, excluir!',
+      cancelButtonText: 'Cancelar',
+      background: '#fff',
+      borderRadius: '10px',
+      customClass: {
+        container: 'font-sans',
+        title: 'text-xl font-bold text-gray-800',
+        content: 'text-gray-600',
+        confirmButton: 'rounded-md',
+        cancelButton: 'rounded-md'
+      }
+    })
+
+    if (result.isConfirmed) {
+      try {
+        const docRef = doc(firestore, 'demandas', id)
+        await deleteDoc(docRef)
+        
+        // Atualiza a lista local removendo a solicitação excluída
+        setSolicitacoes(prevSolicitacoes => 
+          prevSolicitacoes.filter(s => s.id !== id)
+        )
+        
+        Swal.fire({
+          title: 'Excluído!',
+          text: 'A solicitação foi excluída com sucesso.',
+          icon: 'success',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'OK',
+          background: '#fff',
+          borderRadius: '10px',
+          customClass: {
+            container: 'font-sans',
+            title: 'text-xl font-bold text-gray-800',
+            content: 'text-gray-600',
+            confirmButton: 'rounded-md'
+          }
+        })
+      } catch (error) {
+        console.error('Erro ao excluir solicitação:', error)
+        Swal.fire({
+          title: 'Erro!',
+          text: 'Não foi possível excluir a solicitação.',
+          icon: 'error',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'OK',
+          background: '#fff',
+          borderRadius: '10px',
+          customClass: {
+            container: 'font-sans',
+            title: 'text-xl font-bold text-gray-800',
+            content: 'text-gray-600',
+            confirmButton: 'rounded-md'
+          }
+        })
+      }
+    }
+  }
 
   return (
     <div className="p-6">
@@ -137,6 +210,11 @@ function ListaSolicitacoes() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-900">
                 Responsável
               </th>
+              {isAdmin && (
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-900">
+                  Ações
+                </th>
+              )}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-900">
@@ -184,6 +262,17 @@ function ListaSolicitacoes() {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {solicitacao.responsavel || 'N/A'}
                 </td>
+                {isAdmin && (
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <button
+                      onClick={() => handleDelete(solicitacao.id)}
+                      className="text-red-600 hover:text-red-800 transition-colors"
+                      title="Excluir solicitação"
+                    >
+                      <TrashIcon className="h-5 w-5" />
+                    </button>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

@@ -268,7 +268,7 @@ export function DetalhesSolicitacao({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             <div className="p-4 rounded-lg bg-[#f2f3f5] border border-gray-900">
               <h3 className="text-sm font-medium text-gray-500">Descrição</h3>
               {isEditing ? (
@@ -283,10 +283,9 @@ export function DetalhesSolicitacao({
               )}
             </div>
 
-            <div className="p-4 rounded-lg bg-[#f2f3f5] border border-gray-900">
+            {/* <div className="p-4 rounded-lg bg-[#f2f3f5] border border-gray-900">
               <h3 className="text-sm font-medium text-gray-500">Arquivos do Solicitante</h3>
-              {/* Adicione aqui a lógica para exibir os arquivos */}
-            </div>
+            </div> */}
           </div>
 
           <div className="mt-8 flex justify-end space-x-4">

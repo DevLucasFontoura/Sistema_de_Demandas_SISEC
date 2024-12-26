@@ -194,13 +194,19 @@ function DetalhesDaSolicitacaoPage() {
 
       const solicitacaoData = solicitacaoDoc.data()
       
-      // Formata as datas para DD / MM / YYYY
-      const prazoAtual = solicitacaoData.prazo
-      const [anoAtual, mesAtual, diaAtual] = prazoAtual.split('-')
-      const dataAnteriorFormatada = `${diaAtual} / ${mesAtual} / ${anoAtual}`
+      // Formata a data atual da solicitação
+      const dataAnterior = new Date(solicitacaoData.prazo)
+      const diaAnterior = dataAnterior.getDate().toString().padStart(2, '0')
+      const mesAnterior = (dataAnterior.getMonth() + 1).toString().padStart(2, '0')
+      const anoAnterior = dataAnterior.getFullYear()
+      const dataAnteriorFormatada = `**${diaAnterior} / ${mesAnterior} / ${anoAnterior}**`
       
-      const [anoNovo, mesNovo, diaNovo] = novoPrazo.split('-')
-      const dataNovaFormatada = `${diaNovo} / ${mesNovo} / ${anoNovo}`
+      // Formata a nova data
+      const dataNova = new Date(novoPrazo)
+      const diaNovo = dataNova.getDate().toString().padStart(2, '0')
+      const mesNovo = (dataNova.getMonth() + 1).toString().padStart(2, '0')
+      const anoNovo = dataNova.getFullYear()
+      const dataNovaFormatada = `**${diaNovo} / ${mesNovo} / ${anoNovo}**`
 
       const comentarioId = Date.now().toString()
       const novoAdiamento = {
@@ -213,14 +219,19 @@ function DetalhesDaSolicitacaoPage() {
         arquivos: []
       }
 
-      // Atualiza o documento
+      // Atualiza o documento no Firestore
       await updateDoc(solicitacaoRef, {
         prazo: novoPrazo,
         [`comentarios.${comentarioId}`]: novoAdiamento
       })
 
+      // Atualiza o estado local
+      setSolicitacao(prev => prev ? {
+        ...prev,
+        prazo: novoPrazo
+      } : null)
+
       toast.success('Adiamento solicitado com sucesso!')
-      await fetchSolicitacao()
     } catch (error) {
       console.error('Erro ao solicitar adiamento:', error)
       toast.error('Erro ao solicitar adiamento.')
@@ -270,8 +281,6 @@ function DetalhesDaSolicitacaoPage() {
     <div className="container mx-auto px-4 py-8">
       {solicitacao ? (
         <div>
-          <h1 className="text-3xl font-bold mb-6">{solicitacao.titulo}</h1>
-          
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <DetalhesSolicitacao solicitacao={solicitacao} />
           </div>

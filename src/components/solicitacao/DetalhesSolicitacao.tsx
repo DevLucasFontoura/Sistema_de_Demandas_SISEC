@@ -158,18 +158,15 @@ export function DetalhesSolicitacao({
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-      <button
-        onClick={() => navigate('/lista-solicitacoes')}
-        className="flex items-center text-gray-600 hover:text-gray-800 transition-colors"
-      >
-        <ChevronLeftIcon className="w-5 h-5 mr-1" />
-        Voltar para Solicitações
-      </button>
-      
-      {solicitacao.status !== 'concluida' && (
-        <AdiamentoSolicitacao onAdiar={handleAdiarSolicitacao} />
-      )}
+        <button
+          onClick={() => navigate('/lista-solicitacoes')}
+          className="flex items-center text-gray-600 hover:text-gray-800 transition-colors"
+        >
+          <ChevronLeftIcon className="w-5 h-5 mr-1" />
+          Voltar para Solicitações
+        </button>
       </div>
+
       <div className="bg-white rounded-lg shadow-md p-6 border border-gray-900">
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">

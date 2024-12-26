@@ -45,6 +45,10 @@ export function ComentariosSolicitacao({
     return `${dia} / ${mes} / ${ano}`
   }
 
+  const processText = (text: string) => {
+    return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+  }
+
   return (
     <div className={`border rounded-lg p-6 bg-white ${className}`}>
       <div className="flex justify-between items-center mb-6">
@@ -96,9 +100,10 @@ export function ComentariosSolicitacao({
                 </button>
               )}
             </div>
-            <p className="mt-2 text-gray-600 whitespace-pre-line">
-              {comentario.texto}
-            </p>
+            <p 
+              className="mt-2 text-gray-600 whitespace-pre-line"
+              dangerouslySetInnerHTML={{ __html: processText(comentario.texto) }}
+            />
           </div>
         ))}
       </div>

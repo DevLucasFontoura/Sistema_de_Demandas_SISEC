@@ -282,7 +282,10 @@ function DetalhesDaSolicitacaoPage() {
       {solicitacao ? (
         <div>
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <DetalhesSolicitacao solicitacao={solicitacao} />
+            <DetalhesSolicitacao 
+              solicitacao={solicitacao} 
+              onSave={handleSave}
+            />
           </div>
           
           <ComentariosSolicitacao

@@ -44,7 +44,7 @@ export interface Solicitacao {
 
 interface DetalhesSolicitacaoProps {
   solicitacao: Solicitacao
-  onSave: (updatedSolicitacao: Solicitacao) => void
+  onSave: (solicitacao: Solicitacao) => void
   onComplete?: () => void
 }
 

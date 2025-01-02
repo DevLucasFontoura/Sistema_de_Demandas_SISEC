@@ -251,8 +251,9 @@ function DetalhesDaSolicitacaoPage() {
         return
       }
 
+      const { id: docId, ...updateData } = updatedSolicitacao
       const docRef = doc(firestore, 'demandas', id)
-      await updateDoc(docRef, updatedSolicitacao)
+      await updateDoc(docRef, updateData)
 
       setSolicitacao(updatedSolicitacao)
       toast.success('Solicitação atualizada com sucesso!')

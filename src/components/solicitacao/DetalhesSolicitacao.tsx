@@ -136,21 +136,10 @@ export function DetalhesSolicitacao({
       arquivos: []
     }
 
-    setSolicitacao(prev => {
-      const comentariosAtuais = prev.comentarios || {}
-      return {
-        ...prev,
-        comentarios: {
-          ...comentariosAtuais,
-          [comentarioAdiamento.id]: {
-            mensagem: comentarioAdiamento.texto,
-            autor: comentarioAdiamento.autor,
-            dataCriacao: comentarioAdiamento.data.toISOString(),
-            arquivos: comentarioAdiamento.arquivos
-          }
-        }
-      }
-    })
+    setSolicitacao(prev => ({
+      ...prev,
+      comentarios: [...(prev.comentarios || []), comentarioAdiamento]
+    }))
 
     toast.success('Prazo atualizado com sucesso!')
   }

@@ -12,7 +12,7 @@ function Sidebar() {
   const baseMenuItems = [
     { path: '/lista-solicitacoes', icon: ClipboardDocumentListIcon, label: 'Solicitações' },
     { path: '/nova-solicitacao', icon: PlusCircleIcon, label: 'Nova Solicitação' },
-    { path: '/dashboard', icon: HomeIcon, label: 'Dashboard' },
+    // { path: '/dashboard', icon: HomeIcon, label: 'Dashboard' },
   ]
 
   // Menu items apenas para administradores

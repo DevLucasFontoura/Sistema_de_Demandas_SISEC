@@ -14,7 +14,7 @@ function Login() {
   useEffect(() => {
     console.log('Login useEffect - user:', user, 'loading:', loading)
     if (user && !loading) {
-      navigate('/dashboard')
+      navigate('/lista-solicitacoes')
     }
   }, [user, loading, navigate])
 

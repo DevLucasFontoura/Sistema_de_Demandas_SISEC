@@ -15,12 +15,20 @@ interface Comentario {
   id: string
   texto: string
   autor: string
-  data: Date
+  data: Date | string
   arquivos?: Arquivo[]
 }
 
+interface Adiamento {
+  autor: string
+  dataAdiamento: string
+  justificativa: string
+  novoPrazo: string
+}
+
 interface ComentariosSolicitacaoProps {
-  comentarios: Comentario[]
+  comentarios?: Comentario[]
+  adiamentos?: Adiamento[]
   onAddComentario: (texto: string, arquivos?: File[]) => void
   onDeleteComentario?: (id: string) => void
   onAdiarSolicitacao: (novoPrazo: string, justificativa: string) => Promise<void>
@@ -28,7 +36,8 @@ interface ComentariosSolicitacaoProps {
 }
 
 export function ComentariosSolicitacao({
-  comentarios,
+  comentarios = [],
+  adiamentos = [],
   onAddComentario,
   onDeleteComentario,
   onAdiarSolicitacao,
@@ -38,16 +47,49 @@ export function ComentariosSolicitacao({
   const isAdmin = user?.role === 'adm' || user?.role === 'ti'
   const [novoComentario, setNovoComentario] = useState('')
 
-  const formatDate = (date: Date) => {
-    const dia = date.getDate().toString().padStart(2, '0')
-    const mes = (date.getMonth() + 1).toString().padStart(2, '0')
-    const ano = date.getFullYear()
+  const formatDate = (date: Date | string) => {
+    let localDate: Date;
+    
+    if (typeof date === 'string') {
+      // Se for string, converte para Date
+      localDate = new Date(date + 'T00:00:00')
+    } else {
+      // Se já for Date, usa diretamente
+      localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+    }
+    
+    const dia = localDate.getDate().toString().padStart(2, '0')
+    const mes = (localDate.getMonth() + 1).toString().padStart(2, '0')
+    const ano = localDate.getFullYear()
     return `${dia} / ${mes} / ${ano}`
   }
 
   const processText = (text: string) => {
     return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
   }
+
+  const getAllItems = () => {
+    // Garante que comentarios e adiamentos sejam arrays, mesmo que vazios
+    const comentariosArray = comentarios || [];
+    const adiamentosArray = adiamentos || [];
+
+    const comentariosFormatados = comentariosArray.map(c => ({
+      ...c,
+      tipo: 'comentario' as const,
+      data: new Date(c.data)
+    }));
+
+    const adiamentosFormatados = adiamentosArray.map(a => ({
+      id: a.dataAdiamento,
+      autor: a.autor,
+      data: new Date(a.dataAdiamento),
+      texto: `Solicitou adiamento para ${formatDate(a.novoPrazo)}. Justificativa: ${a.justificativa}`,
+      tipo: 'adiamento' as const
+    }));
+
+    return [...comentariosFormatados, ...adiamentosFormatados]
+      .sort((a, b) => b.data.getTime() - a.data.getTime());
+  };
 
   return (
     <div className={`border rounded-lg p-6 bg-white ${className}`}>
@@ -80,20 +122,25 @@ export function ComentariosSolicitacao({
         </button>
       </div>
 
-      {/* Lista de comentários */}
+      {/* Lista de comentários e adiamentos */}
       <div className="space-y-4">
-        {comentarios.map((comentario) => (
-          <div key={comentario.id} className="border rounded-lg p-4 bg-gray-50">
+        {getAllItems().map((item) => (
+          <div 
+            key={item.id} 
+            className={`border rounded-lg p-4 ${
+              item.tipo === 'adiamento' ? 'bg-yellow-50' : 'bg-gray-50'
+            }`}
+          >
             <div className="flex justify-between items-start">
               <div>
-                <span className="font-medium text-gray-800">{comentario.autor}</span>
+                <span className="font-medium text-gray-800">{item.autor}</span>
                 <span className="text-sm text-gray-500 ml-2">
-                  {formatDate(comentario.data)}
+                  {formatDate(item.data)}
                 </span>
               </div>
-              {isAdmin && onDeleteComentario && (
+              {item.tipo === 'comentario' && isAdmin && onDeleteComentario && (
                 <button
-                  onClick={() => onDeleteComentario(comentario.id)}
+                  onClick={() => onDeleteComentario(item.id)}
                   className="text-red-500 hover:text-red-600"
                 >
                   <TrashIcon className="h-5 w-5" />
@@ -102,7 +149,11 @@ export function ComentariosSolicitacao({
             </div>
             <p 
               className="mt-2 text-gray-600 whitespace-pre-line"
-              dangerouslySetInnerHTML={{ __html: processText(comentario.texto) }}
+              dangerouslySetInnerHTML={{ 
+                __html: item.tipo === 'comentario' 
+                  ? processText(item.texto) 
+                  : item.texto 
+              }}
             />
           </div>
         ))}

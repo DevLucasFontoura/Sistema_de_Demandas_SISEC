@@ -144,6 +144,12 @@ export function DetalhesSolicitacao({
     toast.success('Prazo atualizado com sucesso!')
   }
 
+  const formatarData = (data: string) => {
+    // Cria uma nova data usando a string da data e adiciona o horário padrão
+    const date = new Date(data + 'T00:00:00')
+    return date.toLocaleDateString('pt-BR')
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -200,7 +206,7 @@ export function DetalhesSolicitacao({
                 />
               ) : (
                 <p className="mt-1 text-gray-800">
-                  {formatDate(solicitacao.prazo)}
+                  {solicitacao.prazo ? formatarData(solicitacao.prazo) : 'Não definido'}
                 </p>
               )}
             </div>

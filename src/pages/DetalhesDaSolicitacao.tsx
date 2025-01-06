@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { getFirestore, doc, getDoc, updateDoc, collection, addDoc, getDocs, deleteField } from 'firebase/firestore'
+import { getFirestore, doc, getDoc, updateDoc, collection, addDoc, getDocs, deleteField, arrayUnion } from 'firebase/firestore'
 import { DetalhesSolicitacao } from '../components/solicitacao/DetalhesSolicitacao'
 import type { Solicitacao } from '../components/solicitacao/DetalhesSolicitacao'
 import toast from 'react-hot-toast'
@@ -178,58 +178,52 @@ function DetalhesDaSolicitacaoPage() {
         return
       }
 
-      // Busca os dados do usuário no Firestore
+      // Função para formatar a data
+      const formatarData = (data: string) => {
+        const [ano, mes, dia] = data.split('-')
+        return `${dia} / ${mes} / ${ano}`
+      }
+
       const userDocRef = doc(firestore, 'usuarios', user.uid)
       const userDoc = await getDoc(userDocRef)
       const userData = userDoc.data()
 
-      // Busca a solicitação atual
-      const solicitacaoRef = doc(firestore, 'demandas', id)
-      const solicitacaoDoc = await getDoc(solicitacaoRef)
-      
-      if (!solicitacaoDoc.exists()) {
-        toast.error('Solicitação não encontrada.')
-        return
-      }
-
-      const solicitacaoData = solicitacaoDoc.data()
-      
-      // Formata a data atual da solicitação
-      const dataAnterior = new Date(solicitacaoData.prazo)
-      const diaAnterior = dataAnterior.getDate().toString().padStart(2, '0')
-      const mesAnterior = (dataAnterior.getMonth() + 1).toString().padStart(2, '0')
-      const anoAnterior = dataAnterior.getFullYear()
-      const dataAnteriorFormatada = `**${diaAnterior} / ${mesAnterior} / ${anoAnterior}**`
-      
-      // Formata a nova data
-      const dataNova = new Date(novoPrazo)
-      const diaNovo = dataNova.getDate().toString().padStart(2, '0')
-      const mesNovo = (dataNova.getMonth() + 1).toString().padStart(2, '0')
-      const anoNovo = dataNova.getFullYear()
-      const dataNovaFormatada = `**${diaNovo} / ${mesNovo} / ${anoNovo}**`
-
-      const comentarioId = Date.now().toString()
-      const novoAdiamento = {
-        autor: userData?.nome || 'Usuário',
+      const now = new Date().toISOString()
+      const comentarioAdiamento = {
+        autor: userData?.nome || user.email,
+        dataCriacao: now,
+        mensagem: `Solicitou adiamento para ${formatarData(novoPrazo)}.\nJustificativa: ${justificativa}`,
         userId: user.uid,
-        mensagem: `Solicitação de adiamento de ${dataAnteriorFormatada} para ${dataNovaFormatada}.\nJustificativa: ${justificativa}`,
-        dataCriacao: new Date().toISOString(),
-        tipo: 'adiamento',
-        novoPrazo,
         arquivos: []
       }
 
-      // Atualiza o documento no Firestore
-      await updateDoc(solicitacaoRef, {
+      // Gera um ID único para o comentário
+      const comentarioId = Date.now().toString()
+
+      // Atualiza a solicitação com o novo prazo e adiciona tanto no adiamento quanto nos comentários
+      await updateDoc(doc(firestore, 'demandas', id), {
         prazo: novoPrazo,
-        [`comentarios.${comentarioId}`]: novoAdiamento
+        adiamentos: arrayUnion({
+          novoPrazo,
+          justificativa,
+          dataAdiamento: now,
+          autor: userData?.nome || user.email
+        }),
+        [`comentarios.${comentarioId}`]: comentarioAdiamento
       })
 
       // Atualiza o estado local
-      setSolicitacao(prev => prev ? {
-        ...prev,
-        prazo: novoPrazo
-      } : null)
+      setSolicitacao(prev => {
+        if (!prev) return null
+        return {
+          ...prev,
+          prazo: novoPrazo,
+          comentarios: {
+            ...prev.comentarios,
+            [comentarioId]: comentarioAdiamento
+          }
+        }
+      })
 
       toast.success('Adiamento solicitado com sucesso!')
     } catch (error) {

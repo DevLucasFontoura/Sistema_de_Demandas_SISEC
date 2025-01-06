@@ -10,9 +10,9 @@ function Sidebar() {
 
   // Menu items básicos para todos os usuários
   const baseMenuItems = [
-    { path: '/dashboard', icon: HomeIcon, label: 'Dashboard' },
-    { path: '/nova-solicitacao', icon: PlusCircleIcon, label: 'Nova Solicitação' },
     { path: '/lista-solicitacoes', icon: ClipboardDocumentListIcon, label: 'Solicitações' },
+    { path: '/nova-solicitacao', icon: PlusCircleIcon, label: 'Nova Solicitação' },
+    { path: '/dashboard', icon: HomeIcon, label: 'Dashboard' },
   ]
 
   // Menu items apenas para administradores

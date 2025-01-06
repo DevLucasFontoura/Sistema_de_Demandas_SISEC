@@ -3,14 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { 
   ClockIcon, 
   CheckCircleIcon,
-  ExclamationTriangleIcon,
   MagnifyingGlassIcon,
   TrashIcon
 } from '@heroicons/react/24/outline'
 import { getFirestore, collection, getDocs, deleteDoc, doc } from 'firebase/firestore'
-import { formatDate } from '../utils/date'
 import { useAuth } from '../context/AuthContext'
-import { toast } from 'react-hot-toast'
 import Swal from 'sweetalert2'
 
 const firestore = getFirestore()
@@ -66,6 +63,23 @@ export function UrgenciaBadge({ urgencia }: { urgencia: Demanda['urgencia'] }) {
       {urgencia.charAt(0).toUpperCase() + urgencia.slice(1)}
     </span>
   )
+}
+
+const formatarData = (data: string) => {
+  const date = new Date(data + 'T00:00:00')
+  const dia = date.getDate().toString().padStart(2, '0')
+  const mes = (date.getMonth() + 1).toString().padStart(2, '0')
+  const ano = date.getFullYear()
+  return `${dia} / ${mes} / ${ano}`
+}
+
+const formatStatus = (status: string) => {
+  const statusMap = {
+    pendente: 'Pendente',
+    em_andamento: 'Em Andamento',
+    concluida: 'Concluída'
+  }
+  return statusMap[status as keyof typeof statusMap] || status
 }
 
 function ListaSolicitacoes() {
@@ -253,11 +267,11 @@ function ListaSolicitacoes() {
                       solicitacao.status === 'em_andamento' ? 'bg-blue-100 text-blue-800' : 
                       'bg-green-100 text-green-800'}`}
                   >
-                    {solicitacao.status ? solicitacao.status.charAt(0).toUpperCase() + solicitacao.status.slice(1) : 'N/A'}
+                    {formatStatus(solicitacao.status)}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {solicitacao.prazo ? formatDate(solicitacao.prazo) : 'N/A'}
+                  {solicitacao.prazo ? formatarData(solicitacao.prazo) : 'N/A'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {solicitacao.responsavel || 'N/A'}

@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore'
-import { getAuth, sendPasswordResetEmail } from 'firebase/auth'
+import { getAuth, updateUser, signInWithEmailAndPassword } from 'firebase/auth'
 import { db } from '../services/firebaseConfig'
 import { toast } from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
+import { httpsCallable, getFunctions } from 'firebase/functions'
 
 interface Usuario {
   id: string
@@ -53,9 +54,25 @@ function ListaUsuarios() {
 
   const handleToggleUserStatus = async (userId: string, currentStatus: boolean) => {
     try {
+      if (currentStatus && !window.confirm('Tem certeza que deseja desativar este usuário?')) {
+        return
+      }
+
+      // Referência ao documento do usuário no Firestore
       const userRef = doc(db, 'usuarios', userId)
+      
+      // Atualiza o status no Firestore
       await updateDoc(userRef, {
         ativo: !currentStatus
+      })
+
+      // Chama a Cloud Function para atualizar o status no Authentication
+      const functions = getFunctions()
+      const toggleUserStatus = httpsCallable(functions, 'toggleUserStatus')
+      
+      await toggleUserStatus({ 
+        uid: userId, 
+        disabled: currentStatus // se currentStatus é true, vamos desabilitar
       })
       
       // Atualiza a lista local
@@ -145,6 +162,7 @@ function ListaUsuarios() {
                         >
                           Resetar Senha
                         </button>
+                        {/* Botão de desativar comentado temporariamente
                         {isAdmin && (
                           <button
                             onClick={() => handleToggleUserStatus(usuario.id, usuario.ativo)}
@@ -157,6 +175,7 @@ function ListaUsuarios() {
                             {usuario.ativo ? 'Desativar' : 'Ativar'}
                           </button>
                         )}
+                        */}
                       </div>
                     </td>
                   </tr>

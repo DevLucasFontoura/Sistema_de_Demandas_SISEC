@@ -5,7 +5,7 @@ import { User } from 'firebase/auth'
 import { doc, getDoc, getFirestore } from 'firebase/firestore'
 
 interface AuthContextType {
-  user: User & { role?: string } | null
+  user: User & { role?: string, nome?: string } | null
   loading: boolean
   login: (email: string, password: string) => Promise<void>
   userType: string | undefined
@@ -25,7 +25,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User & { role?: string } | null>(null)
+  const [user, setUser] = useState<User & { role?: string, nome?: string } | null>(null)
   const [loading, setLoading] = useState(true)
   const [userType, setUserType] = useState<string>()
   const firestore = getFirestore()
@@ -35,7 +35,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (user) {
         const userDoc = await getDoc(doc(firestore, 'usuarios', user.uid))
         const userData = userDoc.data()
-        setUser({ ...user, role: userData?.tipo })
+        setUser({ 
+          ...user, 
+          role: userData?.tipo,
+          nome: userData?.nome
+        })
         setUserType(userData?.tipo)
       } else {
         setUser(null)
@@ -55,7 +59,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       setUser({
         ...userCredential.user,
-        role: userData?.tipo
+        role: userData?.tipo,
+        nome: userData?.nome
       })
       setUserType(userData?.tipo)
       

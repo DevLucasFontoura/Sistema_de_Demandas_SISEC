@@ -29,7 +29,7 @@ export interface Solicitacao {
   titulo: string
   descricao: string
   tipo: string
-  status: 'pendente' | 'em_andamento' | 'concluida'
+  status: 'pendente' | 'em_andamento' | 'concluida' | 'suspenso'
   dataCriacao: string
   prazo: string
   solicitante: string
@@ -44,8 +44,8 @@ export interface Solicitacao {
 
 interface DetalhesSolicitacaoProps {
   solicitacao: Solicitacao
-  onSave: (solicitacao: Solicitacao) => void
-  onComplete?: () => void
+  onSave: (solicitacao: Solicitacao) => Promise<void>
+  onComplete: () => Promise<void>
 }
 
 export function DetalhesSolicitacao({
@@ -180,6 +180,7 @@ export function DetalhesSolicitacao({
                   <option value="pendente">Pendente</option>
                   <option value="em_andamento">Em Andamento</option>
                   <option value="concluida">Concluída</option>
+                  <option value="suspenso">Suspenso</option>
                 </select>
               ) : (
                 <div className="mt-1">

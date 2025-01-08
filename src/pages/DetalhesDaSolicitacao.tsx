@@ -1,31 +1,40 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { getFirestore, doc, getDoc, updateDoc, collection, addDoc, getDocs, deleteField, arrayUnion } from 'firebase/firestore'
+import { getFirestore, doc, getDoc, updateDoc, collection, getDocs, deleteField, arrayUnion } from 'firebase/firestore'
 import { DetalhesSolicitacao } from '../components/solicitacao/DetalhesSolicitacao'
 import type { Solicitacao } from '../components/solicitacao/DetalhesSolicitacao'
 import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
 import { ComentariosSolicitacao } from '../components/solicitacao/ComentariosSolicitacao'
 
+interface Comentario {
+  id: string
+  texto: string
+  autor: string
+  data: Date
+  tipo?: 'comentario' | 'adiamento'
+  novoPrazo?: string
+  arquivos?: string[]
+}
+
 const firestore = getFirestore()
 
-interface Solicitacao {
-  id: string
-  solicitante: string
-  tipo: string
-  urgencia: string
-  status: string
-  prazo: string
-  descricao: string
-  titulo: string
-  responsavel?: string
-}
+// interface Solicitacao {
+//   id: string
+//   solicitante: string
+//   tipo: string
+//   urgencia: string
+//   status: string
+//   prazo: string
+//   descricao: string
+//   titulo: string
+//   responsavel?: string
+// }
 
 function DetalhesDaSolicitacaoPage() {
   const { id } = useParams<{ id: string }>()
   const { user } = useAuth()
   const [solicitacao, setSolicitacao] = useState<Solicitacao | null>(null)
-  const [loading, setLoading] = useState<boolean>(true)
   const [comentarios, setComentarios] = useState<Comentario[]>([])
   const isAdmin = user?.role === 'adm' || user?.role === 'ti'
 
@@ -178,17 +187,12 @@ function DetalhesDaSolicitacaoPage() {
         return
       }
 
-      // Função para formatar a data
-      const formatarData = (data: string) => {
-        const [ano, mes, dia] = data.split('-')
-        return `${dia} / ${mes} / ${ano}`
-      }
-
       const userDocRef = doc(firestore, 'usuarios', user.uid)
       const userDoc = await getDoc(userDocRef)
       const userData = userDoc.data()
 
       const now = new Date().toISOString()
+      const comentarioId = Date.now().toString()
       const comentarioAdiamento = {
         autor: userData?.nome || user.email,
         dataCriacao: now,
@@ -196,9 +200,6 @@ function DetalhesDaSolicitacaoPage() {
         userId: user.uid,
         arquivos: []
       }
-
-      // Gera um ID único para o comentário
-      const comentarioId = Date.now().toString()
 
       // Atualiza a solicitação com o novo prazo e adiciona tanto no adiamento quanto nos comentários
       await updateDoc(doc(firestore, 'demandas', id), {
@@ -218,9 +219,18 @@ function DetalhesDaSolicitacaoPage() {
         return {
           ...prev,
           prazo: novoPrazo,
+          // Mantém a estrutura original dos comentários e adiciona o novo
           comentarios: {
             ...prev.comentarios,
-            [comentarioId]: comentarioAdiamento
+            [comentarioId]: {
+              id: comentarioId,
+              texto: comentarioAdiamento.mensagem,
+              autor: comentarioAdiamento.autor,
+              data: new Date(comentarioAdiamento.dataCriacao),
+              tipo: 'adiamento',
+              novoPrazo,
+              arquivos: []
+            }
           }
         }
       })
@@ -230,6 +240,11 @@ function DetalhesDaSolicitacaoPage() {
       console.error('Erro ao solicitar adiamento:', error)
       toast.error('Erro ao solicitar adiamento.')
     }
+  }
+
+  const formatarData = (data: string): string => {
+    const [ano, mes, dia] = data.split('-')
+    return `${dia}/${mes}/${ano}`
   }
 
   useEffect(() => {
@@ -280,6 +295,7 @@ function DetalhesDaSolicitacaoPage() {
             <DetalhesSolicitacao 
               solicitacao={solicitacao} 
               onSave={handleSave}
+              onComplete={handleComplete}
             />
           </div>
           
@@ -295,6 +311,7 @@ function DetalhesDaSolicitacaoPage() {
               await handleAdiarSolicitacao(novoPrazo, justificativa)
             }}
             className="mt-6"
+            isAdmin={isAdmin}
           />
         </div>
       ) : (

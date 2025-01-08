@@ -77,7 +77,8 @@ const formatStatus = (status: string) => {
   const statusMap = {
     pendente: 'Pendente',
     em_andamento: 'Em Andamento',
-    concluida: 'Concluída'
+    concluida: 'Concluída',
+    suspenso: 'Suspenso'
   }
   return statusMap[status as keyof typeof statusMap] || status
 }
@@ -263,9 +264,11 @@ function ListaSolicitacoes() {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                    ${solicitacao.status === 'pendente' ? 'bg-gray-100 text-gray-800' : 
-                      solicitacao.status === 'em_andamento' ? 'bg-blue-100 text-blue-800' : 
-                      'bg-green-100 text-green-800'}`}
+                    ${solicitacao.status === 'pendente' ? 'bg-red-100 text-red-800' : 
+                      solicitacao.status === 'em_andamento' ? 'bg-yellow-100 text-yellow-800' : 
+                      solicitacao.status === 'concluida' ? 'bg-green-100 text-green-800' :
+                      solicitacao.status === 'suspenso' ? 'bg-gray-100 text-gray-800' :
+                      'bg-gray-100 text-gray-800'}`}
                   >
                     {formatStatus(solicitacao.status)}
                   </span>

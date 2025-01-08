@@ -1,8 +1,9 @@
 // src/components/solicitacao/ComentariosSolicitacao.tsx
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { TrashIcon } from '@heroicons/react/24/outline'
 import { useAuth } from '../../context/AuthContext'
 import { AdiamentoSolicitacao } from './AdiamentoSolicitacao'
+import { toast } from 'react-hot-toast'
 
 interface Arquivo {
   id: string
@@ -68,19 +69,16 @@ export function ComentariosSolicitacao({
     return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
   }
 
-  const getAllItems = () => {
-    // Garante que comentarios e adiamentos sejam arrays, mesmo que vazios
-    const comentariosArray = comentarios || [];
-    const adiamentosArray = adiamentos || [];
-
-    const comentariosFormatados = comentariosArray.map(c => ({
+  // Processa o histórico combinado de comentários e adiamentos
+  const historicoCombinado = useMemo(() => {
+    const comentariosFormatados = comentarios.map(c => ({
       ...c,
       tipo: 'comentario' as const,
       data: new Date(c.data)
     }));
 
-    const adiamentosFormatados = adiamentosArray.map(a => ({
-      id: a.dataAdiamento,
+    const adiamentosFormatados = adiamentos.map(a => ({
+      id: `adiamento-${a.dataAdiamento}`,
       autor: a.autor,
       data: new Date(a.dataAdiamento),
       texto: `Solicitou adiamento para ${formatDate(a.novoPrazo)}. Justificativa: ${a.justificativa}`,
@@ -89,7 +87,21 @@ export function ComentariosSolicitacao({
 
     return [...comentariosFormatados, ...adiamentosFormatados]
       .sort((a, b) => b.data.getTime() - a.data.getTime());
-  };
+  }, [comentarios, adiamentos]);
+
+  // Função para lidar com a adição de comentário
+  const handleAddComentario = async () => {
+    if (novoComentario.trim()) {
+      try {
+        await onAddComentario(novoComentario)
+        setNovoComentario('') // Limpa o campo após adicionar
+        toast.success('Comentário adicionado com sucesso!')
+      } catch (error) {
+        console.error('Erro ao adicionar comentário:', error)
+        toast.error('Erro ao adicionar comentário')
+      }
+    }
+  }
 
   return (
     <div className={`border rounded-lg p-6 bg-white ${className}`}>
@@ -110,12 +122,7 @@ export function ComentariosSolicitacao({
           rows={4}
         />
         <button
-          onClick={() => {
-            if (novoComentario.trim()) {
-              onAddComentario(novoComentario)
-              setNovoComentario('')
-            }
-          }}
+          onClick={handleAddComentario}
           className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
         >
           Adicionar Comentário
@@ -124,13 +131,8 @@ export function ComentariosSolicitacao({
 
       {/* Lista de comentários e adiamentos */}
       <div className="space-y-4">
-        {getAllItems().map((item) => (
-          <div 
-            key={item.id} 
-            className={`border rounded-lg p-4 ${
-              item.tipo === 'adiamento' ? 'bg-yellow-50' : 'bg-gray-50'
-            }`}
-          >
+        {historicoCombinado.map((item) => (
+          <div key={item.id} className="p-4 bg-gray-50 rounded-lg">
             <div className="flex justify-between items-start">
               <div>
                 <span className="font-medium text-gray-800">{item.autor}</span>

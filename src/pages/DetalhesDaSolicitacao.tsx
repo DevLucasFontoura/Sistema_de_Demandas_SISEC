@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { getFirestore, doc, getDoc, updateDoc, collection, getDocs, deleteField, arrayUnion } from 'firebase/firestore'
+import { getFirestore, doc, getDoc, updateDoc, deleteField, arrayUnion } from 'firebase/firestore'
 import { DetalhesSolicitacao } from '../components/solicitacao/DetalhesSolicitacao'
 import type { Solicitacao } from '../components/solicitacao/DetalhesSolicitacao'
 import toast from 'react-hot-toast'
@@ -77,54 +77,64 @@ function DetalhesDaSolicitacaoPage() {
     try {
       if (!id) return;
       
-      const comentariosRef = collection(firestore, 'demandas', id, 'comentarios');
-      const querySnapshot = await getDocs(comentariosRef);
+      // Busca o documento da demanda
+      const demandaRef = doc(firestore, 'demandas', id);
+      const demandaSnap = await getDoc(demandaRef);
       
-      const comentariosData = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        texto: doc.data().mensagem,
-        autor: doc.data().autor,
-        data: new Date(doc.data().dataCriacao),
-        arquivos: doc.data().arquivos || []
-      }));
-      
-      setComentarios(comentariosData);
+      if (demandaSnap.exists()) {
+        const data = demandaSnap.data();
+        const comentariosMap = data.comentarios || {};
+        
+        // Converte o map de comentários em um array
+        const comentariosArray = Object.entries(comentariosMap).map(([key, value]: [string, any]) => ({
+          id: key,
+          texto: value.mensagem, // Note que no Firebase está como 'mensagem', não 'texto'
+          autor: value.autor,
+          data: value.dataCriacao,
+          arquivos: value.arquivos || []
+        }));
+        
+        // Ordena por data (mais recentes primeiro)
+        const comentariosOrdenados = comentariosArray.sort((a, b) => {
+          return new Date(b.data).getTime() - new Date(a.data).getTime();
+        });
+        
+        setComentarios(comentariosOrdenados);
+      }
     } catch (error) {
-      console.error('Erro ao buscar comentários:', error);
       toast.error('Erro ao carregar comentários.');
     }
   };
 
-  const handleAddComentario = async (texto: string, arquivos?: File[]) => {
+  const handleAddComentario = async (texto: string) => {
     try {
       if (!id || !user || !texto.trim()) {
         toast.error('Erro ao adicionar comentário.')
         return
       }
 
-      // Busca os dados do usuário no Firestore
+      // Busca os dados do usuário
       const userDocRef = doc(firestore, 'usuarios', user.uid)
       const userDoc = await getDoc(userDocRef)
       const userData = userDoc.data()
 
-      const docRef = doc(firestore, 'demandas', id)
-      const comentarioId = Date.now().toString()
-      
-      // Usa o nome do documento do usuário
+      const timestamp = Date.now();
       const novoComentario = {
-        autor: userData?.nome || 'Usuário', // Usa o nome do documento do usuário
-        userId: user.uid,
         mensagem: texto,
+        autor: userData?.nome || user.displayName || 'Usuário', // Prioriza o nome do usuário do banco
         dataCriacao: new Date().toISOString(),
+        userId: user.uid,
         arquivos: []
       }
 
-      await updateDoc(docRef, {
-        [`comentarios.${comentarioId}`]: novoComentario
-      })
+      // Atualiza o documento adicionando o novo comentário ao map
+      const demandaRef = doc(firestore, 'demandas', id);
+      await updateDoc(demandaRef, {
+        [`comentarios.${timestamp}`]: novoComentario
+      });
 
       toast.success('Comentário adicionado com sucesso!')
-      await fetchSolicitacao()
+      await fetchComentarios(); // Recarrega os comentários
     } catch (error) {
       console.error('Erro ao adicionar comentário:', error)
       toast.error('Erro ao adicionar comentário.')
@@ -135,15 +145,14 @@ function DetalhesDaSolicitacaoPage() {
     try {
       if (!id) return;
 
-      const docRef = doc(firestore, 'demandas', id);
-      
-      // Remove o comentário do map
-      await updateDoc(docRef, {
+      // Remove o comentário do map usando deleteField()
+      const demandaRef = doc(firestore, 'demandas', id);
+      await updateDoc(demandaRef, {
         [`comentarios.${comentarioId}`]: deleteField()
       });
 
       toast.success('Comentário excluído com sucesso!');
-      await fetchSolicitacao(); // Recarrega os comentários
+      await fetchComentarios(); // Recarrega os comentários
     } catch (error) {
       console.error('Erro ao excluir comentário:', error);
       toast.error('Erro ao excluir comentário.');
@@ -220,6 +229,7 @@ function DetalhesDaSolicitacaoPage() {
   useEffect(() => {
     if (id) {
       fetchSolicitacao();
+      fetchComentarios(); // Carrega os comentários iniciais
     }
   }, [id]);
 
@@ -273,13 +283,7 @@ function DetalhesDaSolicitacaoPage() {
             comentarios={comentarios}
             onAddComentario={handleAddComentario}
             onDeleteComentario={handleDeleteComentario}
-            onAdiarSolicitacao={async (novoPrazo, justificativa) => {
-              console.log('DetalhesDaSolicitacao: Chamando handleAdiarSolicitacao', {
-                novoPrazo,
-                justificativa
-              })
-              await handleAdiarSolicitacao(novoPrazo, justificativa)
-            }}
+            onAdiarSolicitacao={handleAdiarSolicitacao}
             className="mt-6"
             isAdmin={isAdmin}
           />

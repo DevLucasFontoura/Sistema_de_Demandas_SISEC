@@ -11,7 +11,7 @@ export function AdiamentoSolicitacao({ onAdiar }: AdiamentoProps) {
   const [novoPrazo, setNovoPrazo] = useState('')
   const [justificativa, setJustificativa] = useState('')
   const { user } = useAuth()
-  const isAdmin = user?.role === 'adm' || user?.role === 'ti'
+  const isAdminOrTI = user?.role === 'adm' || user?.role === 'equipe_ti'
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -40,7 +40,7 @@ export function AdiamentoSolicitacao({ onAdiar }: AdiamentoProps) {
     }
   }
 
-  if (!isAdmin) return null
+  if (!isAdminOrTI) return null
 
   return (
     <div>

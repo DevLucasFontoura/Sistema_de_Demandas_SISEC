@@ -45,7 +45,8 @@ export function ComentariosSolicitacao({
   className = ''
 }: ComentariosSolicitacaoProps) {
   const { user } = useAuth()
-  const isAdmin = user?.role === 'adm' || user?.role === 'ti'
+  const isAdminOrTI = user?.role === 'adm' || user?.role === 'equipe_ti'
+  const isAdmin = user?.role === 'adm'
   const [novoComentario, setNovoComentario] = useState('')
 
   const formatDate = (date: Date | string) => {
@@ -107,7 +108,7 @@ export function ComentariosSolicitacao({
     <div className={`border rounded-lg p-6 bg-white ${className}`}>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">Comentários</h2>
-        {isAdmin && (
+        {isAdminOrTI && (
           <AdiamentoSolicitacao onAdiar={onAdiarSolicitacao} />
         )}
       </div>

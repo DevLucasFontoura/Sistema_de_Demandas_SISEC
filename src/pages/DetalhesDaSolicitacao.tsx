@@ -162,59 +162,43 @@ function DetalhesDaSolicitacaoPage() {
   const handleAdiarSolicitacao = async (novoPrazo: string, justificativa: string) => {
     try {
       if (!id || !user) {
-        toast.error('Erro ao adicionar adiamento.')
+        toast.error('Erro ao solicitar adiamento.')
         return
       }
 
+      // Busca os dados do usuário
       const userDocRef = doc(firestore, 'usuarios', user.uid)
       const userDoc = await getDoc(userDocRef)
       const userData = userDoc.data()
 
-      const now = new Date().toISOString()
-      const comentarioId = Date.now().toString()
-      const comentarioAdiamento = {
-        autor: userData?.nome || user.email,
-        dataCriacao: now,
+      const timestamp = Date.now();
+      const novoAdiamento = {
         mensagem: `Solicitou adiamento para ${formatarData(novoPrazo)}.\nJustificativa: ${justificativa}`,
+        autor: userData?.nome || user.displayName || 'Usuário',
+        dataCriacao: new Date().toISOString(),
         userId: user.uid,
-        arquivos: []
+        arquivos: [],
+        tipo: 'adiamento',
+        novoPrazo,
+        justificativa
       }
 
-      // Atualiza a solicitação com o novo prazo e adiciona tanto no adiamento quanto nos comentários
-      await updateDoc(doc(firestore, 'demandas', id), {
-        prazo: novoPrazo,
-        adiamentos: arrayUnion({
-          novoPrazo,
-          justificativa,
-          dataAdiamento: now,
-          autor: userData?.nome || user.email
-        }),
-        [`comentarios.${comentarioId}`]: comentarioAdiamento
-      })
+      // Atualiza o documento adicionando o novo adiamento como um comentário e atualiza o prazo
+      const demandaRef = doc(firestore, 'demandas', id);
+      await updateDoc(demandaRef, {
+        [`comentarios.${timestamp}`]: novoAdiamento,
+        prazo: novoPrazo // Atualiza o prazo da demanda
+      });
 
-      // Atualiza o estado local
-      setSolicitacao(prev => {
-        if (!prev) return null
-        return {
-          ...prev,
-          prazo: novoPrazo,
-          // Mantém a estrutura original dos comentários e adiciona o novo
-          comentarios: {
-            ...prev.comentarios,
-            [comentarioId]: {
-              id: comentarioId,
-              texto: comentarioAdiamento.mensagem,
-              autor: comentarioAdiamento.autor,
-              data: new Date(comentarioAdiamento.dataCriacao),
-              tipo: 'adiamento',
-              novoPrazo,
-              arquivos: []
-            }
-          }
-        }
-      })
+      // Atualiza a solicitação local com o novo prazo
+      setSolicitacao(prev => ({
+        ...prev,
+        prazo: novoPrazo
+      }));
 
       toast.success('Adiamento solicitado com sucesso!')
+      await fetchComentarios(); // Recarrega os comentários imediatamente
+      await fetchSolicitacao(); // Recarrega a solicitação para atualizar o prazo
     } catch (error) {
       console.error('Erro ao solicitar adiamento:', error)
       toast.error('Erro ao solicitar adiamento.')
@@ -223,7 +207,7 @@ function DetalhesDaSolicitacaoPage() {
 
   const formatarData = (data: string): string => {
     const [ano, mes, dia] = data.split('-')
-    return `${dia}/${mes}/${ano}`
+    return `${dia} / ${mes} / ${ano}`
   }
 
   useEffect(() => {

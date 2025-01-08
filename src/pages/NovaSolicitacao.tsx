@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
-import { getFirestore, doc, setDoc, updateDoc, arrayUnion, getDoc } from 'firebase/firestore'
+import { getFirestore, doc, setDoc, updateDoc, arrayUnion, getDoc, serverTimestamp } from 'firebase/firestore'
 
 const firestore = getFirestore()
 
@@ -47,7 +47,7 @@ function NovaSolicitacao() {
       status: 'pendente',
       tipo: formData.tipo,
       urgencia: formData.urgencia,
-      dataCriacao: new Date().toISOString(),
+      createdAt: serverTimestamp(),
       userId: user?.uid
     }
 

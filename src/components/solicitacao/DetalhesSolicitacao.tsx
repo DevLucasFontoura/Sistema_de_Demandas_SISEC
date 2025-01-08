@@ -30,10 +30,12 @@ export interface Solicitacao {
   descricao: string
   tipo: string
   status: 'pendente' | 'em_andamento' | 'concluida' | 'suspenso'
-  dataCriacao: string
+  dataCriacao: any // Pode ser um Timestamp do Firestore
   prazo: string
   solicitante: string
   responsavel?: string
+  urgencia: 'baixa' | 'media' | 'alta'
+  userId?: string
   comentarios?: Comentario[]
   adiamentos?: {
     novoPrazo: string
@@ -144,10 +146,41 @@ export function DetalhesSolicitacao({
     toast.success('Prazo atualizado com sucesso!')
   }
 
-  const formatarData = (data: string) => {
-    // Cria uma nova data usando a string da data e adiciona o horário padrão
-    const date = new Date(data + 'T00:00:00')
-    return date.toLocaleDateString('pt-BR')
+  const formatarData = (data: any) => {
+    if (!data) return 'Não definido'
+    
+    try {
+      // Se for um timestamp do Firestore
+      if (data && typeof data === 'object' && 'seconds' in data) {
+        const date = new Date(data.seconds * 1000)
+        return date.toLocaleDateString('pt-BR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        })
+      }
+      
+      // Se for uma string de data no formato YYYY-MM-DD (como o prazo)
+      if (typeof data === 'string' && data.includes('-')) {
+        const [ano, mes, dia] = data.split('-')
+        return `${dia}/${mes}/${ano}`
+      }
+
+      // Para outros formatos de data
+      const date = new Date(data)
+      if (!isNaN(date.getTime())) {
+        return date.toLocaleDateString('pt-BR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        })
+      }
+
+      return data // Retorna o valor original se não for possível formatar
+    } catch (error) {
+      console.error('Erro ao formatar data:', error)
+      return 'Data inválida'
+    }
   }
 
   return (
@@ -192,7 +225,7 @@ export function DetalhesSolicitacao({
             <div className="p-4 rounded-lg bg-[#f2f3f5] border border-gray-900">
               <h3 className="text-sm font-medium text-gray-500">Data de Criação</h3>
               <p className="mt-1 text-gray-800">
-                {formatDate(solicitacao.dataCriacao)}
+                {formatarData(solicitacao.dataCriacao)}
               </p>
             </div>
 
@@ -320,4 +353,5 @@ export function DetalhesSolicitacao({
   )
 }
 
+// Quando eu editar quero q ao salvar ele subistitua os dados la no firebase.
 // Quando eu editar quero q ao salvar ele subistitua os dados la no firebase.

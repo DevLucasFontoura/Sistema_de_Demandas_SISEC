@@ -50,50 +50,20 @@ function DetalhesDaSolicitacaoPage() {
 
       if (docSnap.exists()) {
         const data = docSnap.data()
-        setSolicitacao({ id: docSnap.id, ...data } as Solicitacao)
         
-        // Processa os comentários
-        const comentariosMap = data.comentarios || {}
-        const comentariosArray = Object.entries(comentariosMap).map(([id, comentario]: [string, any]) => {
-          if (comentario.tipo === 'adiamento' && comentario.novoPrazo) {
-            // Formata as datas para o formato desejado
-            const mensagemPartes = comentario.mensagem.split('Justificativa:')
-            const justificativa = mensagemPartes[1]?.trim() || ''
-
-            // Extrai as datas da mensagem original
-            const regex = /de (\d{2}\/\d{2}\/\d{4}) para (\d{2}\/\d{2}\/\d{4})/
-            const match = comentario.mensagem.match(regex)
-            
-            let texto = comentario.mensagem
-            if (match) {
-              const [_, dataAntiga, dataNova] = match
-              texto = `Solicitação de adiamento de ${dataAntiga} para ${dataNova}.\nJustificativa: ${justificativa}`
-            }
-
-            return {
-              id,
-              texto,
-              autor: comentario.autor,
-              data: new Date(comentario.dataCriacao),
-              tipo: comentario.tipo,
-              novoPrazo: comentario.novoPrazo,
-              arquivos: comentario.arquivos || []
-            }
-          }
-          
-          // Para comentários normais
-          return {
-            id,
-            texto: comentario.mensagem,
-            autor: comentario.autor,
-            data: new Date(comentario.dataCriacao),
-            tipo: comentario.tipo || 'comentario',
-            novoPrazo: comentario.novoPrazo,
-            arquivos: comentario.arquivos || []
-          }
-        }).sort((a, b) => b.data.getTime() - a.data.getTime())
-        
-        setComentarios(comentariosArray)
+        setSolicitacao({ 
+          id: docSnap.id,
+          titulo: data.titulo || '',
+          descricao: data.descricao || '',
+          tipo: data.tipo || '',
+          status: data.status || 'pendente',
+          dataCriacao: data.createdAt || null, // Mantém o timestamp original
+          prazo: data.prazo || '',
+          solicitante: data.solicitante || '',
+          responsavel: data.responsavel || '',
+          urgencia: data.urgencia || 'media',
+          userId: data.userId || ''
+        } as Solicitacao)
       } else {
         toast.error('Solicitação não encontrada.')
       }

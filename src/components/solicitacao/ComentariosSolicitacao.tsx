@@ -1,6 +1,6 @@
 // src/components/solicitacao/ComentariosSolicitacao.tsx
-import { useState, useRef } from 'react'
-import { PaperClipIcon, ArrowDownTrayIcon, TrashIcon } from '@heroicons/react/24/outline'
+import { useState } from 'react'
+import { TrashIcon } from '@heroicons/react/24/outline'
 import { useAuth } from '../../context/AuthContext'
 import { AdiamentoSolicitacao } from './AdiamentoSolicitacao'
 

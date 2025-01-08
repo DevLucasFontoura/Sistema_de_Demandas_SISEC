@@ -6,9 +6,10 @@ import {
   MagnifyingGlassIcon,
   TrashIcon
 } from '@heroicons/react/24/outline'
-import { getFirestore, collection, getDocs, deleteDoc, doc } from 'firebase/firestore'
+import { getFirestore, collection, getDocs, deleteDoc, doc, orderBy, query } from 'firebase/firestore'
 import { useAuth } from '../context/AuthContext'
 import Swal from 'sweetalert2'
+import { toast } from 'react-hot-toast'
 
 const firestore = getFirestore()
 
@@ -87,18 +88,53 @@ function ListaSolicitacoes() {
   const { user } = useAuth()
   const isAdmin = user?.role === 'adm' || user?.role === 'equipe_ti'
   const navigate = useNavigate()
-  const [searchId, setSearchId] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
   const [solicitacoes, setSolicitacoes] = useState<Demanda[]>([])
   const [filteredSolicitacoes, setFilteredSolicitacoes] = useState<Demanda[]>([])
 
   useEffect(() => {
     const fetchSolicitacoes = async () => {
       try {
-        const querySnapshot = await getDocs(collection(firestore, 'demandas'))
-        const demandasList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Demanda[]
-        setSolicitacoes(demandasList)
+        const demandasRef = collection(firestore, 'demandas')
+        const querySnapshot = await getDocs(demandasRef)
+        
+        const demandasList = querySnapshot.docs.map(doc => {
+          const data = doc.data()
+          let createdAtDate
+
+          // Trata diferentes formatos de data
+          if (data.createdAt) {
+            if (typeof data.createdAt.toDate === 'function') {
+              // Se for Timestamp do Firestore
+              createdAtDate = data.createdAt.toDate()
+            } else if (typeof data.createdAt === 'string') {
+              // Se for string ISO
+              createdAtDate = new Date(data.createdAt)
+            } else {
+              // Fallback para data atual
+              createdAtDate = new Date()
+            }
+          } else {
+            createdAtDate = new Date()
+          }
+
+          return {
+            ...data,
+            id: doc.id,
+            createdAt: createdAtDate
+          }
+        })
+
+        // Ordena por data de criação (mais recente primeiro)
+        const sortedDemandas = demandasList.sort((a, b) => 
+          b.createdAt.getTime() - a.createdAt.getTime()
+        )
+
+        setSolicitacoes(sortedDemandas)
+        setFilteredSolicitacoes(sortedDemandas)
       } catch (error) {
         console.error('Erro ao buscar solicitações:', error)
+        toast.error('Erro ao carregar solicitações')
       }
     }
 
@@ -106,11 +142,15 @@ function ListaSolicitacoes() {
   }, [])
 
   useEffect(() => {
-    const filtered = searchId
-      ? solicitacoes.filter(s => s.id.includes(searchId))
+    const filtered = searchTerm
+      ? solicitacoes.filter(s => 
+          s.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          s.solicitante.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (s.titulo || '').toLowerCase().includes(searchTerm.toLowerCase())
+        )
       : solicitacoes
     setFilteredSolicitacoes(filtered)
-  }, [searchId, solicitacoes])
+  }, [searchTerm, solicitacoes])
 
   const handleDelete = async (id: string) => {
     const result = await Swal.fire({
@@ -191,10 +231,10 @@ function ListaSolicitacoes() {
             </div>
             <input
               type="text"
-              placeholder="Buscar por ID..."
-              value={searchId}
-              onChange={(e) => setSearchId(e.target.value)}
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+              placeholder="Buscar por ID, solicitante ou título..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500 w-80"
             />
           </div>
         </div>

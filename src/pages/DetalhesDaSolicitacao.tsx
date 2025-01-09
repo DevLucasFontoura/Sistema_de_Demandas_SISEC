@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getFirestore, doc, getDoc, updateDoc, deleteField, arrayUnion, collection, Timestamp, query, where, orderBy, getDocs } from 'firebase/firestore'
+import { getFirestore, doc, getDoc, updateDoc, deleteField, arrayUnion, collection, Timestamp, query, where, orderBy, getDocs, addDoc, deleteDoc } from 'firebase/firestore'
 import type { Solicitacao } from '../components/solicitacao/DetalhesSolicitacao'
 import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
@@ -49,6 +49,30 @@ function DetalhesDaSolicitacaoPage() {
   const [isAdiamentoModalOpen, setIsAdiamentoModalOpen] = useState(false)
   const [justificativaAdiamento, setJustificativaAdiamento] = useState('')
   const [novaData, setNovaData] = useState('')
+  const [userProfile, setUserProfile] = useState<any>(null)
+
+  // Ajustando a verificação para "Equipe de TI"
+  const isEquipeTI = userProfile?.perfil === "Equipe de TI";
+
+  // Função para buscar perfil do usuário com log para debug
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!user?.uid) return;
+      
+      try {
+        const userDoc = await getDoc(doc(db, 'usuarios', user.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setUserProfile(userData);
+          console.log('Perfil do usuário:', userData); // Log para debug
+        }
+      } catch (error) {
+        console.error('Erro ao buscar perfil do usuário:', error);
+      }
+    };
+
+    fetchUserProfile();
+  }, [user]);
 
   const fetchSolicitacao = async () => {
     if (!id) return;
@@ -72,40 +96,70 @@ function DetalhesDaSolicitacaoPage() {
     if (!id) return;
 
     try {
-      const comentariosRef = collection(db, 'comentarios');
-      const q = query(comentariosRef, 
-        where('solicitacaoId', '==', id),
-        orderBy('data', 'desc')
-      );
+      const solicitacaoRef = doc(db, 'demandas', id);
+      const solicitacaoSnap = await getDoc(solicitacaoRef);
       
-      const querySnapshot = await getDocs(q);
-      const comentariosData = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      
-      setComentarios(comentariosData);
+      if (solicitacaoSnap.exists()) {
+        const data = solicitacaoSnap.data();
+        if (data.comentarios) {
+          // Convertendo o objeto de comentários em array
+          const comentariosArray = Object.entries(data.comentarios).map(([key, value]: [string, any]) => ({
+            id: key,
+            ...value
+          }));
+          
+          // Ordenando por data de criação (mais recentes primeiro)
+          comentariosArray.sort((a, b) => {
+            return new Date(b.dataCriacao).getTime() - new Date(a.dataCriacao).getTime();
+          });
+          
+          setComentarios(comentariosArray);
+        }
+      }
     } catch (error) {
       console.error('Erro ao buscar comentários:', error);
+      toast.error('Erro ao carregar comentários');
     }
   };
 
   const handleAddComentario = async () => {
     if (!novoComentario.trim()) return;
-    
+
     try {
-      // Implemente a lógica de adicionar comentário
+      const solicitacaoRef = doc(db, 'demandas', id);
+      const timestamp = new Date().toISOString();
+      
+      await updateDoc(solicitacaoRef, {
+        [`comentarios.${Date.now()}`]: {
+          mensagem: novoComentario,
+          autor: user?.displayName || user?.email,
+          userId: user?.uid,
+          dataCriacao: timestamp,
+          arquivos: []
+        }
+      });
+
       setNovoComentario('');
+      await fetchComentarios();
+      toast.success('Comentário adicionado com sucesso!');
     } catch (error) {
       console.error('Erro ao adicionar comentário:', error);
+      toast.error('Erro ao adicionar comentário');
     }
   };
 
   const handleDeleteComentario = async (comentarioId: string) => {
     try {
-      // Implemente a lógica de deletar comentário
+      const solicitacaoRef = doc(db, 'demandas', id);
+      await updateDoc(solicitacaoRef, {
+        [`comentarios.${comentarioId}`]: deleteField()
+      });
+      
+      await fetchComentarios();
+      toast.success('Comentário removido com sucesso!');
     } catch (error) {
       console.error('Erro ao deletar comentário:', error);
+      toast.error('Erro ao remover comentário');
     }
   };
 
@@ -192,12 +246,61 @@ function DetalhesDaSolicitacaoPage() {
     }
   };
 
-  const onComplete = async () => {
+  const handleComplete = async () => {
+    if (!id) return;
+
     try {
-      // Aqui você implementa a lógica de completar a solicitação
-      console.log('Solicitação completada');
+      const solicitacaoRef = doc(db, 'demandas', id);
+      await updateDoc(solicitacaoRef, {
+        status: 'concluida',
+        dataFinalizacao: new Date().toISOString()
+      });
+
+      await fetchSolicitacao();
+      toast.success('Solicitação concluída com sucesso!');
     } catch (error) {
-      console.error('Erro ao completar solicitação:', error);
+      console.error('Erro ao concluir solicitação:', error);
+      toast.error('Erro ao concluir solicitação');
+    }
+  };
+
+  const handleReopen = async () => {
+    if (!id) return;
+
+    try {
+      const solicitacaoRef = doc(db, 'demandas', id);
+      
+      // Busca o perfil do usuário para ter o nome correto
+      const userDoc = await getDoc(doc(db, 'usuarios', user?.uid || ''));
+      const userName = userDoc.exists() ? userDoc.data().nome : 'Usuário';
+      
+      // Atualiza o status da demanda
+      await updateDoc(solicitacaoRef, {
+        status: 'em_andamento'
+      });
+      
+      // Adiciona o comentário usando o nome correto do usuário
+      await updateDoc(solicitacaoRef, {
+        [`comentarios.${Date.now()}`]: {
+          mensagem: `Demanda reaberta pelo usuário: ${userName}`,
+          autor: userName,
+          dataCriacao: Timestamp.now(),
+          userId: user?.uid,
+          arquivos: []
+        }
+      });
+
+      // Feedback visual
+      toast.success('Demanda reaberta com sucesso!');
+      
+      // Recarrega os dados
+      await Promise.all([
+        fetchSolicitacao(),
+        fetchComentarios()
+      ]);
+    } catch (error) {
+      console.error('Erro ao reabrir demanda:', error);
+      toast.error('Erro ao reabrir demanda. Tente novamente.');
     }
   };
 
@@ -241,27 +344,38 @@ function DetalhesDaSolicitacaoPage() {
               </div>
               
               <div className="flex space-x-3">
-                {isEditing ? (
+                {solicitacao?.status === 'concluida' && (
+                  <button
+                    onClick={() => {
+                      console.log('Clicou em reabrir');  // Log para debug
+                      handleReopen();
+                    }}
+                    className="px-4 py-2 text-white bg-gradient-to-r from-blue-400 to-cyan-500 rounded-lg transition-all duration-200 hover:from-blue-500 hover:to-cyan-600 font-medium"
+                  >
+                    Reabrir Demanda
+                  </button>
+                )}
+                {solicitacao?.status !== 'concluida' && (
                   <>
                     <button
-                      onClick={handleCancel}
-                      className="px-4 py-2 text-gray-300 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-lg transition-all duration-200"
+                      onClick={handleEdit}
+                      className="px-4 py-2 text-white bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg transition-all duration-200 hover:from-purple-600 hover:to-pink-600 font-medium"
                     >
-                      Cancelar
+                      Editar
                     </button>
                     <button
-                      onClick={handleSave}
-                      className="px-4 py-2 text-gray-300 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-lg transition-all duration-200"
+                      onClick={() => setIsAdiamentoModalOpen(true)}
+                      className="px-4 py-2 text-white bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg transition-all duration-200 hover:from-yellow-500 hover:to-orange-600 font-medium"
                     >
-                      Salvar
+                      Solicitar Adiamento
+                    </button>
+                    <button
+                      onClick={handleComplete}
+                      className="px-4 py-2 text-white bg-gradient-to-r from-green-400 to-emerald-500 rounded-lg transition-all duration-200 hover:from-green-500 hover:to-emerald-600 font-medium"
+                    >
+                      Marcar como Concluído
                     </button>
                   </>
-                ) : (
-                  <AcoesSolicitacao
-                    status={solicitacao.status}
-                    onEdit={handleEdit}
-                    onComplete={onComplete}
-                  />
                 )}
               </div>
             </div>
@@ -296,16 +410,10 @@ function DetalhesDaSolicitacaoPage() {
 
               {/* Seção de Comentários */}
               <div className="bg-gray-50 rounded-lg p-6">
-                <div className="flex justify-between items-center mb-4">
+                <div className="mb-4">
                   <h3 className="text-sm font-medium text-gray-500">Comentários</h3>
-                  <button 
-                    onClick={() => setIsAdiamentoModalOpen(true)}
-                    className="text-sm font-medium text-yellow-600 hover:text-yellow-700 bg-yellow-100 px-3 py-1 rounded-full hover:bg-yellow-200 transition-colors"
-                  >
-                    Solicitar Adiamento
-                  </button>
                 </div>
-
+                
                 {/* Formulário para novo comentário */}
                 <div className="mb-6">
                   <textarea
@@ -326,25 +434,27 @@ function DetalhesDaSolicitacaoPage() {
                   </div>
                 </div>
 
-                {/* Lista de comentários existentes */}
+                {/* Lista de comentários */}
                 <div className="space-y-4">
                   {comentarios.map((comentario) => (
                     <div key={comentario.id} className="bg-white p-4 rounded-lg border border-gray-200">
                       <div className="flex justify-between items-start mb-2">
                         <div className="flex items-center space-x-2">
                           <span className="font-medium text-gray-900">{comentario.autor}</span>
-                          <span className="text-sm text-gray-500">{formatarData(comentario.data)}</span>
+                          <span className="text-sm text-gray-500">
+                            {formatarData(comentario.dataCriacao)}
+                          </span>
                         </div>
-                        {user?.email === comentario.autorEmail && (
+                        {user?.uid === comentario.userId && (
                           <button
                             onClick={() => handleDeleteComentario(comentario.id)}
-                            className="text-gray-400 hover:text-red-500"
+                            className="text-gray-400 hover:text-red-500 transition-colors"
                           >
                             <TrashIcon className="h-4 w-4" />
                           </button>
                         )}
                       </div>
-                      <p className="text-gray-700 whitespace-pre-wrap">{comentario.texto}</p>
+                      <p className="text-gray-700 whitespace-pre-wrap">{comentario.mensagem}</p>
                     </div>
                   ))}
                 </div>

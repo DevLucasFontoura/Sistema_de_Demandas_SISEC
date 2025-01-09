@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
 import '../utils/Login.css'
+import { ClipboardDocumentListIcon, ChartBarIcon, UserGroupIcon } from '@heroicons/react/24/outline'
 
 function Login() {
   const navigate = useNavigate()
@@ -12,7 +13,6 @@ function Login() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    console.log('Login useEffect - user:', user, 'loading:', loading)
     if (user && !loading) {
       navigate('/lista-solicitacoes')
     }
@@ -26,7 +26,6 @@ function Login() {
     }
 
     try {
-      console.log('Iniciando login...')
       await login(email, password)
       toast.success('Login realizado com sucesso!')
     } catch (error) {
@@ -37,53 +36,77 @@ function Login() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-purple-900 to-black p-8">
-      <header className="text-center mb-1 mt-16">
-        <h1 className="text-6xl font-extrabold text-white mb-4">
-          Controle de Demandas
-        </h1>
-        <h2 className="text-4xl font-semibold text-purple-300">
-          Equipe TI MDS
-        </h2>
-      </header>
-      <div className="flex flex-1 justify-center items-center space-x-24">
-        <div className="text-white text-2xl space-y-6 max-w-md">
-          <p>Otimize a gestão de tarefas e melhore a eficiência da equipe.</p>
-          <p>Monitore o progresso em tempo real e colabore de forma eficaz.</p>
-          <p>Alcance seus objetivos com soluções integradas e intuitivas.</p>
-        </div>
-        <div className="relative animate-dot-border rounded-2xl max-w-2xl w-full">
-          <div className="bg-black bg-opacity-70 p-16 rounded-2xl shadow-2xl w-full">
-            <h2 className="text-center text-3xl font-bold text-white mb-8">
-              Login
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-800 to-blue-900">
+      <div className="container mx-auto px-4 h-screen flex flex-col lg:flex-row items-center justify-center">
+        {/* Lado Esquerdo - Informações */}
+        <div className="lg:w-1/2 text-white lg:pr-16 mb-8 lg:mb-0">
+          <div className="max-w-lg">
+            <h1 className="text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-200 to-pink-200">
+              Controle de Demandas
+            </h1>
+            <h2 className="text-3xl font-semibold mb-8 text-purple-200">
+              Equipe TI MDS
             </h2>
-            <form className="space-y-6" onSubmit={handleSubmit}>
-              <div className="space-y-4">
-                <div>
-                  <input
-                    id="email"
-                    type="email"
-                    className="mt-1 w-full px-4 py-2 bg-gray-800 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Email"
-                  />
+            <div className="space-y-6">
+              <div className="flex items-center space-x-4">
+                <div className="bg-white/10 p-3 rounded-lg">
+                  <ClipboardDocumentListIcon className="w-6 h-6 text-purple-200" />
                 </div>
-                <div>
-                  <input
-                    id="password"
-                    type="password"
-                    className="mt-1 w-full px-4 py-2 bg-gray-800 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Senha"
-                  />
-                </div>
+                <p className="text-lg">Gerencie todas as solicitações em um único lugar</p>
               </div>
-              {error && <p className="text-red-500 text-center">{error}</p>}
-              <button 
-                type="submit" 
-                className="w-full py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-md hover:from-purple-600 hover:to-indigo-600 transition-colors"
+              <div className="flex items-center space-x-4">
+                <div className="bg-white/10 p-3 rounded-lg">
+                  <ChartBarIcon className="w-6 h-6 text-purple-200" />
+                </div>
+                <p className="text-lg">Acompanhe o progresso em tempo real</p>
+              </div>
+              <div className="flex items-center space-x-4">
+                <div className="bg-white/10 p-3 rounded-lg">
+                  <UserGroupIcon className="w-6 h-6 text-purple-200" />
+                </div>
+                <p className="text-lg">Colabore com sua equipe de forma eficiente</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Lado Direito - Formulário de Login */}
+        <div className="lg:w-1/2 w-full max-w-md">
+          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl">
+            <div className="mb-8 text-center">
+              <h2 className="text-3xl font-bold text-white mb-2">Bem-vindo</h2>
+              <p className="text-purple-200">Faça login para continuar</p>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-purple-200 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20"
+                />
+              </div>
+              <div>
+                <input
+                  type="password"
+                  placeholder="Senha"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-purple-200 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20"
+                />
+              </div>
+              
+              {error && (
+                <div className="text-red-300 text-sm text-center">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className="w-full py-3 px-4 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg font-medium hover:from-purple-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition-all duration-150"
               >
                 Entrar
               </button>

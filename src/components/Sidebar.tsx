@@ -43,54 +43,63 @@ function Sidebar() {
   }
 
   return (
-    <div className="flex flex-col w-64 bg-gray-800 min-h-screen text-white">
-      <div className="p-4 border-b border-gray-700">
-        <h1 className="text-xl font-bold">Controle de Demandas</h1>
+    <div className="flex flex-col w-64 bg-gradient-to-b from-gray-900 to-gray-800 min-h-screen text-white">
+      <div className="p-[0.9rem] border-b border-gray-700/50">
+        <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+          Controle de Demandas
+        </h1>
       </div>
       
-      <div className="p-4 border-b border-gray-700 bg-gray-900">
-        <div className="flex items-center">
-          <div className="h-10 w-10 rounded-full bg-gray-700 flex items-center justify-center">
-            <span className="text-lg font-semibold">
-              {user?.nome?.charAt(0) || user?.email?.charAt(0)?.toUpperCase()}
-            </span>
-          </div>
-          <div className="ml-3 flex flex-col space-y-0.5">
-            <span className="text-sm font-semibold text-white">
+      <div className="p-6 border-b border-gray-700/50 bg-gray-800/50 backdrop-blur-sm">
+        <div className="flex flex-col">
+          <div className="flex items-center space-x-4 mb-2">
+            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+              <span className="text-lg font-semibold">
+                {user?.nome?.charAt(0) || user?.email?.charAt(0)?.toUpperCase()}
+              </span>
+            </div>
+            <span className="text-sm font-medium text-white">
               {user?.nome || 'Usuário'}
             </span>
+          </div>
+          
+          <div className="flex flex-col space-y-1">
             <span className="text-xs text-gray-400">
               {user?.email}
             </span>
-            <span className="text-xs text-gray-400">
+            <span className="text-xs px-2 py-0.5 bg-purple-500/20 text-purple-200 rounded-full inline-flex items-center w-fit">
               {getTipoUsuario(user?.role)}
             </span>
           </div>
         </div>
       </div>
       
-      <nav className="flex-1 mt-4">
+      <nav className="flex-1 mt-6 px-3">
         {menuItems.map((item) => (
           <Link
             key={item.path}
             to={item.path}
-            className={`flex items-center px-6 py-3 text-gray-300 hover:bg-gray-700 transition-colors ${
-              isActive(item.path) ? 'bg-gray-700' : ''
+            className={`flex items-center px-4 py-3 mb-2 rounded-lg text-gray-300 hover:bg-white/10 transition-all duration-200 group ${
+              isActive(item.path) 
+                ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-white shadow-sm' 
+                : ''
             }`}
           >
-            <item.icon className="w-5 h-5 mr-3" />
-            <span className="text-sm">{item.label}</span>
+            <item.icon className={`w-5 h-5 mr-3 transition-transform duration-200 group-hover:scale-110 ${
+              isActive(item.path) ? 'text-purple-400' : ''
+            }`} />
+            <span className="text-sm font-medium">{item.label}</span>
           </Link>
         ))}
       </nav>
 
-      <div className="p-4 border-t border-gray-700">
+      <div className="p-4 mt-auto">
         <button
           onClick={handleLogout}
-          className="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 w-full transition-colors rounded"
+          className="flex items-center justify-center w-full px-4 py-3 rounded-lg text-gray-300 bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-white transition-all duration-200 group"
         >
-          <ArrowLeftOnRectangleIcon className="w-5 h-5 mr-2" />
-          <span className="text-sm">Sair</span>
+          <ArrowLeftOnRectangleIcon className="w-5 h-5 mr-2 transition-transform duration-200 group-hover:-translate-x-1" />
+          <span className="text-sm font-medium">Sair</span>
         </button>
       </div>
     </div>

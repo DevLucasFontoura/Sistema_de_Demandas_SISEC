@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { 
   ClockIcon, 
   CheckCircleIcon,
@@ -25,28 +25,31 @@ interface Demanda {
 
 export function StatusBadge({ status }: { status: Demanda['status'] }) {
   const styles = {
-    pendente: 'bg-yellow-100 text-yellow-800',
-    em_andamento: 'bg-blue-100 text-blue-800',
-    concluida: 'bg-green-100 text-green-800'
+    pendente: 'bg-yellow-100 text-yellow-800 border border-yellow-200',
+    em_andamento: 'bg-blue-100 text-blue-800 border border-blue-200',
+    concluida: 'bg-green-100 text-green-800 border border-green-200',
+    suspenso: 'bg-gray-100 text-gray-800 border border-gray-200'
   }
 
   const icons = {
     pendente: ClockIcon,
     em_andamento: ClockIcon,
-    concluida: CheckCircleIcon
+    concluida: CheckCircleIcon,
+    suspenso: ClockIcon
   }
 
   const labels = {
     pendente: 'Pendente',
     em_andamento: 'Em Andamento',
-    concluida: 'Concluída'
+    concluida: 'Concluída',
+    suspenso: 'Suspenso'
   }
 
   const Icon = icons[status]
 
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${styles[status]}`}>
-      <Icon className="w-4 h-4 mr-1" />
+    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${styles[status]} shadow-sm`}>
+      <Icon className="w-3.5 h-3.5 mr-1" />
       {labels[status]}
     </span>
   )
@@ -54,13 +57,13 @@ export function StatusBadge({ status }: { status: Demanda['status'] }) {
 
 export function UrgenciaBadge({ urgencia }: { urgencia: Demanda['urgencia'] }) {
   const styles = {
-    baixa: 'bg-blue-100 text-blue-800',
-    media: 'bg-yellow-100 text-yellow-800',
-    alta: 'bg-red-100 text-red-800'
+    baixa: 'bg-blue-100 text-blue-800 border border-blue-200',
+    media: 'bg-yellow-100 text-yellow-800 border border-yellow-200',
+    alta: 'bg-red-100 text-red-800 border border-red-200'
   }
 
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${styles[urgencia]}`}>
+    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${styles[urgencia]} shadow-sm`}>
       {urgencia.charAt(0).toUpperCase() + urgencia.slice(1)}
     </span>
   )
@@ -219,10 +222,16 @@ function ListaSolicitacoes() {
     }
   }
 
+  const handleNavigateToDetails = (id: string) => {
+    navigate(`/detalhes-solicitacao/${id}`);
+  };
+
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Lista de Solicitações</h1>
+    <div className="p-8">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600">
+          Lista de Solicitações
+        </h1>
         
         <div className="flex items-center space-x-4">
           <div className="relative">
@@ -234,107 +243,111 @@ function ListaSolicitacoes() {
               placeholder="Buscar por ID, solicitante ou título..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500 w-80"
+              className="pl-10 pr-4 py-2.5 bg-white/5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 w-96 transition-all duration-200"
             />
           </div>
         </div>
       </div>
 
-      <div className="bg-white border border-gray-900 rounded-xl overflow-hidden">
-        <table className="min-w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-900">
-                ID
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-900">
-                Solicitante
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-900">
-                Tipo
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-900">
-                Urgência
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-900">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-900">
-                Prazo
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-900">
-                Responsável
-              </th>
-              {isAdmin && (
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-900">
-                  Ações
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Nº
                 </th>
-              )}
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-900">
-            {filteredSolicitacoes.map((solicitacao) => (
-              <tr key={solicitacao.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  <span 
-                    onClick={() => navigate(`/detalhes-solicitacao/${solicitacao.id}`)}
-                    className="text-blue-600 hover:text-blue-800 cursor-pointer underline"
-                  >
-                    {solicitacao.id}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">
-                    {solicitacao.solicitante}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">
-                    {solicitacao.tipo === 'desenvolvimento' ? 'Desenvolvimento' : 'Dados'}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                    ${solicitacao.urgencia === 'alta' ? 'bg-red-100 text-red-800' : 
-                      solicitacao.urgencia === 'media' ? 'bg-yellow-100 text-yellow-800' : 
-                      'bg-green-100 text-green-800'}`}
-                  >
-                    {solicitacao.urgencia ? solicitacao.urgencia.charAt(0).toUpperCase() + solicitacao.urgencia.slice(1) : 'N/A'}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                    ${solicitacao.status === 'pendente' ? 'bg-red-100 text-red-800' : 
-                      solicitacao.status === 'em_andamento' ? 'bg-yellow-100 text-yellow-800' : 
-                      solicitacao.status === 'concluida' ? 'bg-green-100 text-green-800' :
-                      solicitacao.status === 'suspenso' ? 'bg-gray-100 text-gray-800' :
-                      'bg-gray-100 text-gray-800'}`}
-                  >
-                    {formatStatus(solicitacao.status)}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {solicitacao.prazo ? formatarData(solicitacao.prazo) : 'N/A'}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {solicitacao.responsavel || 'N/A'}
-                </td>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Solicitante
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Tipo
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Urgência
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Prazo
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Responsável
+                </th>
                 {isAdmin && (
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <button
-                      onClick={() => handleDelete(solicitacao.id)}
-                      className="text-red-600 hover:text-red-800 transition-colors"
-                      title="Excluir solicitação"
-                    >
-                      <TrashIcon className="h-5 w-5" />
-                    </button>
-                  </td>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Ações
+                  </th>
                 )}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredSolicitacoes.map((solicitacao) => (
+                <tr 
+                  key={solicitacao.id} 
+                  className="hover:bg-gray-50/50 transition-colors duration-150"
+                >
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <Link
+                      to={`/detalhes-solicitacao/${solicitacao.id}`}
+                      className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                    >
+                      {solicitacao.id}
+                    </Link>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">
+                      {solicitacao.solicitante}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-600">
+                      {solicitacao.tipo === 'desenvolvimento' ? 'Desenvolvimento' : 'Dados'}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <UrgenciaBadge urgencia={solicitacao.urgencia} />
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <StatusBadge status={solicitacao.status} />
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    {solicitacao.prazo ? formatarData(solicitacao.prazo) : 'N/A'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    {solicitacao.responsavel || 'N/A'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button
+                      onClick={() => handleNavigateToDetails(solicitacao.id)}
+                      className="text-primary-600 hover:text-primary-900 mr-4"
+                    >
+                      Ver Detalhes
+                    </button>
+                    {isAdmin && (
+                      <button
+                        onClick={() => handleDelete(solicitacao.id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        <TrashIcon className="h-5 w-5" />
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
+
+      {filteredSolicitacoes.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-gray-500 text-lg">
+            Nenhuma solicitação encontrada.
+          </p>
+        </div>
+      )}
     </div>
   )
 }

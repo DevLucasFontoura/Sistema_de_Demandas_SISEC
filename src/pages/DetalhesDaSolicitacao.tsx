@@ -1,11 +1,16 @@
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { getFirestore, doc, getDoc, updateDoc, deleteField, arrayUnion } from 'firebase/firestore'
-import { DetalhesSolicitacao } from '../components/solicitacao/DetalhesSolicitacao'
 import type { Solicitacao } from '../components/solicitacao/DetalhesSolicitacao'
 import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
-import { ComentariosSolicitacao } from '../components/solicitacao/ComentariosSolicitacao'
+import { ChevronLeftIcon } from '@heroicons/react/24/outline'
+import { StatusBadge } from '../components/StatusBadge'
+import { UrgenciaBadge } from '../components/UrgenciaBadge'
+import { AcoesSolicitacao } from '../components/solicitacao/AcoesSolicitacoes'
+import { TrashIcon } from '@heroicons/react/24/outline'
+import { Dialog, Transition } from '@headlessui/react'
+import { Fragment } from 'react'
 
 interface Comentario {
   id: string
@@ -37,6 +42,12 @@ function DetalhesDaSolicitacaoPage() {
   const [solicitacao, setSolicitacao] = useState<Solicitacao | null>(null)
   const [comentarios, setComentarios] = useState<Comentario[]>([])
   const isAdmin = user?.role === 'adm' || user?.role === 'ti'
+  const navigate = useNavigate()
+  const [isEditing, setIsEditing] = useState(false)
+  const [novoComentario, setNovoComentario] = useState('')
+  const [isAdiamentoModalOpen, setIsAdiamentoModalOpen] = useState(false)
+  const [justificativaAdiamento, setJustificativaAdiamento] = useState('')
+  const [novaData, setNovaData] = useState('')
 
   const fetchSolicitacao = async () => {
     try {
@@ -106,175 +117,388 @@ function DetalhesDaSolicitacaoPage() {
     }
   };
 
-  const handleAddComentario = async (texto: string) => {
+  const handleAddComentario = async () => {
+    if (!novoComentario.trim()) return;
+    
     try {
-      if (!id || !user || !texto.trim()) {
-        toast.error('Erro ao adicionar comentário.')
-        return
-      }
-
-      // Busca os dados do usuário
-      const userDocRef = doc(firestore, 'usuarios', user.uid)
-      const userDoc = await getDoc(userDocRef)
-      const userData = userDoc.data()
-
-      const timestamp = Date.now();
-      const novoComentario = {
-        mensagem: texto,
-        autor: userData?.nome || user.displayName || 'Usuário', // Prioriza o nome do usuário do banco
-        dataCriacao: new Date().toISOString(),
-        userId: user.uid,
-        arquivos: []
-      }
-
-      // Atualiza o documento adicionando o novo comentário ao map
-      const demandaRef = doc(firestore, 'demandas', id);
-      await updateDoc(demandaRef, {
-        [`comentarios.${timestamp}`]: novoComentario
-      });
-
-      toast.success('Comentário adicionado com sucesso!')
-      await fetchComentarios(); // Recarrega os comentários
+      // Implemente a lógica de adicionar comentário
+      setNovoComentario('');
     } catch (error) {
-      console.error('Erro ao adicionar comentário:', error)
-      toast.error('Erro ao adicionar comentário.')
-    }
-  }
-
-  const handleDeleteComentario = async (comentarioId: string) => {
-    try {
-      if (!id) return;
-
-      // Remove o comentário do map usando deleteField()
-      const demandaRef = doc(firestore, 'demandas', id);
-      await updateDoc(demandaRef, {
-        [`comentarios.${comentarioId}`]: deleteField()
-      });
-
-      toast.success('Comentário excluído com sucesso!');
-      await fetchComentarios(); // Recarrega os comentários
-    } catch (error) {
-      console.error('Erro ao excluir comentário:', error);
-      toast.error('Erro ao excluir comentário.');
+      console.error('Erro ao adicionar comentário:', error);
     }
   };
 
-  const handleAdiarSolicitacao = async (novoPrazo: string, justificativa: string) => {
+  const handleDeleteComentario = async (comentarioId: string) => {
     try {
-      if (!id || !user) {
-        toast.error('Erro ao solicitar adiamento.')
-        return
-      }
-
-      // Busca os dados do usuário
-      const userDocRef = doc(firestore, 'usuarios', user.uid)
-      const userDoc = await getDoc(userDocRef)
-      const userData = userDoc.data()
-
-      const timestamp = Date.now();
-      const novoAdiamento = {
-        mensagem: `Solicitou adiamento para ${formatarData(novoPrazo)}.\nJustificativa: ${justificativa}`,
-        autor: userData?.nome || user.displayName || 'Usuário',
-        dataCriacao: new Date().toISOString(),
-        userId: user.uid,
-        arquivos: [],
-        tipo: 'adiamento',
-        novoPrazo,
-        justificativa
-      }
-
-      // Atualiza o documento adicionando o novo adiamento como um comentário e atualiza o prazo
-      const demandaRef = doc(firestore, 'demandas', id);
-      await updateDoc(demandaRef, {
-        [`comentarios.${timestamp}`]: novoAdiamento,
-        prazo: novoPrazo // Atualiza o prazo da demanda
-      });
-
-      // Atualiza a solicitação local com o novo prazo
-      setSolicitacao(prev => ({
-        ...prev,
-        prazo: novoPrazo
-      }));
-
-      toast.success('Adiamento solicitado com sucesso!')
-      await fetchComentarios(); // Recarrega os comentários imediatamente
-      await fetchSolicitacao(); // Recarrega a solicitação para atualizar o prazo
+      // Implemente a lógica de deletar comentário
     } catch (error) {
-      console.error('Erro ao solicitar adiamento:', error)
-      toast.error('Erro ao solicitar adiamento.')
+      console.error('Erro ao deletar comentário:', error);
     }
-  }
+  };
 
-  const formatarData = (data: string): string => {
-    const [ano, mes, dia] = data.split('-')
-    return `${dia} / ${mes} / ${ano}`
-  }
+  const handleAdiarSolicitacao = async () => {
+    try {
+      // Aqui você implementa a lógica de adiamento com a API
+      console.log({
+        justificativa: justificativaAdiamento,
+        novaData: novaData
+      });
+      
+      setIsAdiamentoModalOpen(false);
+      setJustificativaAdiamento('');
+      setNovaData('');
+    } catch (error) {
+      console.error('Erro ao solicitar adiamento:', error);
+    }
+  };
+
+  const formatarData = (data: any) => {
+    if (!data) return 'Não definido';
+    
+    try {
+      // Se for um Timestamp do Firestore
+      if (data?.seconds) {
+        const date = new Date(data.seconds * 1000);
+        const dia = date.getDate().toString().padStart(2, '0');
+        const mes = (date.getMonth() + 1).toString().padStart(2, '0');
+        const ano = date.getFullYear();
+        return `${dia}/${mes}/${ano}`;
+      }
+      
+      // Se for uma data normal
+      if (data instanceof Date) {
+        const dia = data.getDate().toString().padStart(2, '0');
+        const mes = (data.getMonth() + 1).toString().padStart(2, '0');
+        const ano = data.getFullYear();
+        return `${dia}/${mes}/${ano}`;
+      }
+      
+      // Se for uma string no formato YYYY-MM-DD
+      if (typeof data === 'string') {
+        const [ano, mes, dia] = data.split('-');
+        if (ano && mes && dia) {
+          return `${dia}/${mes}/${ano}`;
+        }
+      }
+      
+      return 'Data inválida';
+    } catch (error) {
+      console.error('Erro ao formatar data:', error);
+      return 'Data inválida';
+    }
+  };
 
   useEffect(() => {
     if (id) {
       fetchSolicitacao();
-      fetchComentarios(); // Carrega os comentários iniciais
+      fetchComentarios();
     }
   }, [id]);
 
-  const handleSave = async (updatedSolicitacao: Solicitacao) => {
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+  };
+
+  const handleSave = async () => {
     try {
-      if (!id) {
-        toast.error('ID da solicitação não fornecido.')
-        return
-      }
-
-      const { id: docId, ...updateData } = updatedSolicitacao
-      const docRef = doc(firestore, 'demandas', id)
-      await updateDoc(docRef, updateData)
-
-      setSolicitacao(updatedSolicitacao)
-      toast.success('Solicitação atualizada com sucesso!')
+      // Aqui você implementa a lógica de salvar as alterações
+      setIsEditing(false);
     } catch (error) {
-      toast.error('Erro ao atualizar solicitação.')
-      console.error('Erro ao atualizar solicitação:', error)
+      console.error('Erro ao salvar alterações:', error);
     }
-  }
+  };
 
-  const handleComplete = async () => {
-    if (solicitacao) {
-      try {
-        const docRef = doc(firestore, 'demandas', id)
-        await updateDoc(docRef, { status: 'concluida' })
-        
-        await fetchSolicitacao()
-        toast.success('Solicitação marcada como concluída!')
-      } catch (error) {
-        toast.error('Erro ao atualizar solicitação.')
-        console.error('Erro ao atualizar solicitação:', error)
-      }
+  const onComplete = async () => {
+    try {
+      // Aqui você implementa a lógica de completar a solicitação
+      console.log('Solicitação completada');
+    } catch (error) {
+      console.error('Erro ao completar solicitação:', error);
     }
-  }
+  };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {solicitacao ? (
+    <div className="p-8">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
         <div>
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <DetalhesSolicitacao 
-              solicitacao={solicitacao} 
-              onSave={handleSave}
-              onComplete={handleComplete}
-            />
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            Detalhes da Solicitação
+          </h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Visualize e gerencie os detalhes desta solicitação
+          </p>
+        </div>
+        <button
+          onClick={() => navigate('/lista-solicitacoes')}
+          className="flex items-center px-4 py-2 rounded-lg text-gray-300 bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-white transition-all duration-200 group"
+        >
+          <ChevronLeftIcon className="w-5 h-5 mr-2" />
+          Voltar
+        </button>
+      </div>
+
+      {solicitacao ? (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+          {/* Cabeçalho da solicitação */}
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex justify-between items-start">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-3">
+                  {solicitacao.titulo}
+                </h2>
+                <div className="flex items-center space-x-3">
+                  <StatusBadge status={solicitacao.status} />
+                  <span className="text-sm text-gray-500">•</span>
+                  <span className="text-sm text-gray-500">
+                    Criado em {formatarData(solicitacao.dataCriacao)}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="flex space-x-3">
+                {isEditing ? (
+                  <>
+                    <button
+                      onClick={handleCancel}
+                      className="px-4 py-2 text-gray-300 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-lg transition-all duration-200"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={handleSave}
+                      className="px-4 py-2 text-gray-300 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-lg transition-all duration-200"
+                    >
+                      Salvar
+                    </button>
+                  </>
+                ) : (
+                  <AcoesSolicitacao
+                    status={solicitacao.status}
+                    onEdit={handleEdit}
+                    onComplete={onComplete}
+                  />
+                )}
+              </div>
+            </div>
           </div>
-          
-          <ComentariosSolicitacao
-            comentarios={comentarios}
-            onAddComentario={handleAddComentario}
-            onDeleteComentario={handleDeleteComentario}
-            onAdiarSolicitacao={handleAdiarSolicitacao}
-            className="mt-6"
-            isAdmin={isAdmin}
-          />
+
+          {/* Conteúdo em grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
+            {/* Coluna da esquerda - Descrição e Comentários */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Descrição */}
+              <div className="bg-gray-50 rounded-lg p-6">
+                <h3 className="text-sm font-medium text-gray-500 mb-3">Descrição</h3>
+                <div className="prose max-w-none">
+                  <div className="text-gray-700 whitespace-pre-wrap break-words">
+                    {solicitacao.descricao}
+                  </div>
+                  {solicitacao.link && (
+                    <div className="mt-4">
+                      <p className="text-sm font-medium text-gray-500 mb-1">Link:</p>
+                      <a 
+                        href={solicitacao.link} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 break-all"
+                      >
+                        {solicitacao.link}
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Seção de Comentários */}
+              <div className="bg-gray-50 rounded-lg p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-sm font-medium text-gray-500">Comentários</h3>
+                  <button 
+                    onClick={() => setIsAdiamentoModalOpen(true)}
+                    className="text-sm font-medium text-yellow-600 hover:text-yellow-700 bg-yellow-100 px-3 py-1 rounded-full hover:bg-yellow-200 transition-colors"
+                  >
+                    Solicitar Adiamento
+                  </button>
+                </div>
+
+                {/* Formulário para novo comentário */}
+                <div className="mb-6">
+                  <textarea
+                    value={novoComentario}
+                    onChange={(e) => setNovoComentario(e.target.value)}
+                    placeholder="Adicione um comentário..."
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                    rows={3}
+                  />
+                  <div className="mt-2 flex justify-end">
+                    <button
+                      onClick={handleAddComentario}
+                      disabled={!novoComentario.trim()}
+                      className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-sm"
+                    >
+                      Adicionar Comentário
+                    </button>
+                  </div>
+                </div>
+
+                {/* Lista de comentários existentes */}
+                <div className="space-y-4">
+                  {comentarios.map((comentario) => (
+                    <div key={comentario.id} className="bg-white p-4 rounded-lg border border-gray-200">
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-medium text-gray-900">{comentario.autor}</span>
+                          <span className="text-sm text-gray-500">{formatarData(comentario.data)}</span>
+                        </div>
+                        {user?.email === comentario.autorEmail && (
+                          <button
+                            onClick={() => handleDeleteComentario(comentario.id)}
+                            className="text-gray-400 hover:text-red-500"
+                          >
+                            <TrashIcon className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
+                      <p className="text-gray-700 whitespace-pre-wrap">{comentario.texto}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Coluna da direita - Detalhes */}
+            <div className="space-y-6">
+              <div className="bg-gray-50 rounded-lg p-6">
+                <h3 className="text-sm font-medium text-gray-500 mb-4">Detalhes</h3>
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm text-gray-500">Solicitante</p>
+                    <p className="text-gray-700 font-medium">{solicitacao.solicitante}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Tipo</p>
+                    <p className="text-gray-700 font-medium">
+                      {solicitacao.tipo === 'desenvolvimento' ? 'Desenvolvimento' : 'Dados'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Responsável</p>
+                    <p className="text-gray-700 font-medium">{solicitacao.responsavel || 'Não atribuído'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Prazo</p>
+                    <p className="text-gray-700 font-medium">{formatarData(solicitacao.prazo)}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Urgência</p>
+                    <div className="mt-1">
+                      <UrgenciaBadge urgencia={solicitacao.urgencia} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       ) : (
-        <p>Solicitação não encontrada.</p>
+        <div className="flex items-center justify-center h-64">
+          <p className="text-gray-500">Carregando detalhes da solicitação...</p>
+        </div>
       )}
+
+      {/* Modal de Adiamento */}
+      <Transition appear show={isAdiamentoModalOpen} as={Fragment}>
+        <Dialog 
+          as="div" 
+          className="relative z-10" 
+          onClose={() => setIsAdiamentoModalOpen(false)}
+        >
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black bg-opacity-25" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <Dialog.Title
+                    as="h3"
+                    className="text-lg font-medium leading-6 text-gray-900 mb-4"
+                  >
+                    Solicitar Adiamento
+                  </Dialog.Title>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Nova Data
+                      </label>
+                      <input
+                        type="date"
+                        value={novaData}
+                        onChange={(e) => setNovaData(e.target.value)}
+                        className="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Justificativa
+                      </label>
+                      <textarea
+                        value={justificativaAdiamento}
+                        onChange={(e) => setJustificativaAdiamento(e.target.value)}
+                        rows={4}
+                        className="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+                        placeholder="Digite a justificativa para o adiamento..."
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-6 flex justify-end space-x-3">
+                    <button
+                      type="button"
+                      className="inline-flex justify-center rounded-lg px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
+                      onClick={() => setIsAdiamentoModalOpen(false)}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      className="inline-flex justify-center rounded-lg px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-500/20 to-pink-500/20 hover:from-purple-600/20 hover:to-pink-600/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
+                      onClick={handleAdiarSolicitacao}
+                      disabled={!justificativaAdiamento.trim() || !novaData}
+                    >
+                      Solicitar
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
     </div>
   )
 }

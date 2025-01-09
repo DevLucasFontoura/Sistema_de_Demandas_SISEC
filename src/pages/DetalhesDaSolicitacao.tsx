@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getFirestore, doc, getDoc, updateDoc, deleteField, arrayUnion } from 'firebase/firestore'
+import { getFirestore, doc, getDoc, updateDoc, deleteField, arrayUnion, collection, Timestamp, query, where, orderBy, getDocs } from 'firebase/firestore'
 import type { Solicitacao } from '../components/solicitacao/DetalhesSolicitacao'
 import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
@@ -11,6 +11,7 @@ import { AcoesSolicitacao } from '../components/solicitacao/AcoesSolicitacoes'
 import { TrashIcon } from '@heroicons/react/24/outline'
 import { Dialog, Transition } from '@headlessui/react'
 import { Fragment } from 'react'
+import { db } from '../services/firebaseConfig'
 
 interface Comentario {
   id: string
@@ -39,8 +40,8 @@ const firestore = getFirestore()
 function DetalhesDaSolicitacaoPage() {
   const { id } = useParams<{ id: string }>()
   const { user } = useAuth()
-  const [solicitacao, setSolicitacao] = useState<Solicitacao | null>(null)
-  const [comentarios, setComentarios] = useState<Comentario[]>([])
+  const [solicitacao, setSolicitacao] = useState<any>(null)
+  const [comentarios, setComentarios] = useState<any[]>([])
   const isAdmin = user?.role === 'adm' || user?.role === 'ti'
   const navigate = useNavigate()
   const [isEditing, setIsEditing] = useState(false)
@@ -50,70 +51,42 @@ function DetalhesDaSolicitacaoPage() {
   const [novaData, setNovaData] = useState('')
 
   const fetchSolicitacao = async () => {
+    if (!id) return;
+    
     try {
-      if (!id) {
-        toast.error('ID da solicitação não fornecido.')
-        return
-      }
-
-      const docRef = doc(firestore, 'demandas', id)
-      const docSnap = await getDoc(docRef)
-
-      if (docSnap.exists()) {
-        const data = docSnap.data()
-        
-        setSolicitacao({ 
-          id: docSnap.id,
-          titulo: data.titulo || '',
-          descricao: data.descricao || '',
-          tipo: data.tipo || '',
-          status: data.status || 'pendente',
-          dataCriacao: data.createdAt || null, // Mantém o timestamp original
-          prazo: data.prazo || '',
-          solicitante: data.solicitante || '',
-          responsavel: data.responsavel || '',
-          urgencia: data.urgencia || 'media',
-          userId: data.userId || ''
-        } as Solicitacao)
+      const solicitacaoRef = doc(db, 'demandas', id);
+      const solicitacaoSnap = await getDoc(solicitacaoRef);
+      
+      if (solicitacaoSnap.exists()) {
+        setSolicitacao({ id: solicitacaoSnap.id, ...solicitacaoSnap.data() });
       } else {
-        toast.error('Solicitação não encontrada.')
+        toast.error('Solicitação não encontrada');
       }
     } catch (error) {
-      console.error('Erro ao buscar solicitação:', error)
-      toast.error('Erro ao buscar solicitação.')
+      console.error('Erro ao buscar solicitação:', error);
+      toast.error('Erro ao carregar solicitação');
     }
-  }
+  };
 
   const fetchComentarios = async () => {
+    if (!id) return;
+
     try {
-      if (!id) return;
+      const comentariosRef = collection(db, 'comentarios');
+      const q = query(comentariosRef, 
+        where('solicitacaoId', '==', id),
+        orderBy('data', 'desc')
+      );
       
-      // Busca o documento da demanda
-      const demandaRef = doc(firestore, 'demandas', id);
-      const demandaSnap = await getDoc(demandaRef);
+      const querySnapshot = await getDocs(q);
+      const comentariosData = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
       
-      if (demandaSnap.exists()) {
-        const data = demandaSnap.data();
-        const comentariosMap = data.comentarios || {};
-        
-        // Converte o map de comentários em um array
-        const comentariosArray = Object.entries(comentariosMap).map(([key, value]: [string, any]) => ({
-          id: key,
-          texto: value.mensagem, // Note que no Firebase está como 'mensagem', não 'texto'
-          autor: value.autor,
-          data: value.dataCriacao,
-          arquivos: value.arquivos || []
-        }));
-        
-        // Ordena por data (mais recentes primeiro)
-        const comentariosOrdenados = comentariosArray.sort((a, b) => {
-          return new Date(b.data).getTime() - new Date(a.data).getTime();
-        });
-        
-        setComentarios(comentariosOrdenados);
-      }
+      setComentarios(comentariosData);
     } catch (error) {
-      toast.error('Erro ao carregar comentários.');
+      console.error('Erro ao buscar comentários:', error);
     }
   };
 
@@ -137,18 +110,27 @@ function DetalhesDaSolicitacaoPage() {
   };
 
   const handleAdiarSolicitacao = async () => {
+    if (!novaData || !justificativaAdiamento) {
+      toast.error('Por favor, preencha todos os campos');
+      return;
+    }
+
     try {
-      // Aqui você implementa a lógica de adiamento com a API
-      console.log({
-        justificativa: justificativaAdiamento,
-        novaData: novaData
+      // Update the solicitacao with new deadline
+      const solicitacaoRef = doc(firestore, 'demandas', id);
+      await updateDoc(solicitacaoRef, {
+        prazo: novaData
       });
-      
+
       setIsAdiamentoModalOpen(false);
       setJustificativaAdiamento('');
       setNovaData('');
+      
+      await fetchSolicitacao();
+      toast.success('Solicitação adiada com sucesso!');
     } catch (error) {
-      console.error('Erro ao solicitar adiamento:', error);
+      console.error('Erro ao adiar solicitação:', error);
+      toast.error('Erro ao adiar solicitação. Tente novamente.');
     }
   };
 
@@ -189,10 +171,8 @@ function DetalhesDaSolicitacaoPage() {
   };
 
   useEffect(() => {
-    if (id) {
-      fetchSolicitacao();
-      fetchComentarios();
-    }
+    fetchSolicitacao();
+    fetchComentarios();
   }, [id]);
 
   const handleEdit = () => {

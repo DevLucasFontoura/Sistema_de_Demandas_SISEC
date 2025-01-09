@@ -102,20 +102,22 @@ function DetalhesDaSolicitacaoPage() {
       if (solicitacaoSnap.exists()) {
         const data = solicitacaoSnap.data();
         if (data.comentarios) {
-          // Convertendo o objeto de comentários em array e adicionando o id
+          // Convertendo o objeto de comentários em array
           const comentariosArray = Object.entries(data.comentarios).map(([key, value]: [string, any]) => ({
             id: key,
-            ...value
+            ...value,
+            // Garantindo que a data seja um objeto Date para comparação
+            timestamp: new Date(value.dataCriacao).getTime()
           }));
           
-          // Ordenando por data de criação (mais recentes primeiro)
-          comentariosArray.sort((a, b) => {
-            const dateA = new Date(a.dataCriacao).getTime();
-            const dateB = new Date(b.dataCriacao).getTime();
-            return dateB - dateA; // Ordem decrescente (mais recente primeiro)
+          // Ordenando por timestamp (mais recentes primeiro)
+          const comentariosOrdenados = comentariosArray.sort((a, b) => {
+            return b.timestamp - a.timestamp;
           });
           
-          setComentarios(comentariosArray);
+          setComentarios(comentariosOrdenados);
+        } else {
+          setComentarios([]);
         }
       }
     } catch (error) {
@@ -166,23 +168,52 @@ function DetalhesDaSolicitacaoPage() {
   };
 
   const handleAdiarSolicitacao = async () => {
-    if (!novaData || !justificativaAdiamento) {
-      toast.error('Por favor, preencha todos os campos');
+    if (!id || !novaData || !justificativaAdiamento.trim()) {
+      toast.error('Preencha todos os campos');
       return;
     }
 
     try {
-      // Update the solicitacao with new deadline
-      const solicitacaoRef = doc(firestore, 'demandas', id);
+      const solicitacaoRef = doc(db, 'demandas', id);
+      
+      // Busca o perfil do usuário para ter o nome correto
+      const userDoc = await getDoc(doc(db, 'usuarios', user?.uid || ''));
+      const userName = userDoc.exists() ? userDoc.data().nome : 'Usuário';
+      
+      // Atualiza apenas a data da solicitação e o histórico de adiamentos
       await updateDoc(solicitacaoRef, {
-        prazo: novaData
+        prazo: novaData,
+        adiamentos: arrayUnion({
+          dataAntiga: solicitacao?.prazo,
+          dataNova: novaData,
+          justificativa: justificativaAdiamento,
+          solicitante: userName,
+          data: Timestamp.now()
+        })
       });
 
+      // Adiciona apenas o comentário de adiamento
+      await updateDoc(solicitacaoRef, {
+        [`comentarios.${Date.now()}`]: {
+          mensagem: `Solicitação de Adiamento pelo usuário: ${userName}\nMotivo: ${justificativaAdiamento}`,
+          autor: userName,
+          dataCriacao: Timestamp.now(),
+          userId: user?.uid,
+          arquivos: []
+        }
+      });
+
+      // Limpa os campos e fecha o modal
       setIsAdiamentoModalOpen(false);
       setJustificativaAdiamento('');
       setNovaData('');
       
-      await fetchSolicitacao();
+      // Recarrega os dados
+      await Promise.all([
+        fetchSolicitacao(),
+        fetchComentarios()
+      ]);
+
       toast.success('Solicitação adiada com sucesso!');
     } catch (error) {
       console.error('Erro ao adiar solicitação:', error);

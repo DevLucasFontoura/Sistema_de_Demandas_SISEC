@@ -102,7 +102,7 @@ function DetalhesDaSolicitacaoPage() {
       if (solicitacaoSnap.exists()) {
         const data = solicitacaoSnap.data();
         if (data.comentarios) {
-          // Convertendo o objeto de comentários em array
+          // Convertendo o objeto de comentários em array e adicionando o id
           const comentariosArray = Object.entries(data.comentarios).map(([key, value]: [string, any]) => ({
             id: key,
             ...value
@@ -110,7 +110,9 @@ function DetalhesDaSolicitacaoPage() {
           
           // Ordenando por data de criação (mais recentes primeiro)
           comentariosArray.sort((a, b) => {
-            return new Date(b.dataCriacao).getTime() - new Date(a.dataCriacao).getTime();
+            const dateA = new Date(a.dataCriacao).getTime();
+            const dateB = new Date(b.dataCriacao).getTime();
+            return dateB - dateA; // Ordem decrescente (mais recente primeiro)
           });
           
           setComentarios(comentariosArray);
@@ -432,55 +434,57 @@ function DetalhesDaSolicitacaoPage() {
               </div>
 
               {/* Seção de Comentários */}
-              <div className="bg-gray-50 rounded-lg p-6">
-                <div className="mb-4">
-                  <h3 className="text-sm font-medium text-gray-500">Comentários</h3>
-                </div>
-                
-                {/* Formulário para novo comentário */}
-                <div className="mb-6">
-                  <textarea
-                    value={novoComentario}
-                    onChange={(e) => setNovoComentario(e.target.value)}
-                    placeholder="Adicione um comentário..."
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
-                    rows={3}
-                  />
-                  <div className="mt-2 flex justify-end">
-                    <button
-                      onClick={handleAddComentario}
-                      disabled={!novoComentario.trim()}
-                      className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-sm"
-                    >
-                      Adicionar Comentário
-                    </button>
+              {solicitacao?.status !== 'concluida' && (
+                <div className="bg-gray-50 rounded-lg p-6">
+                  <div className="mb-4">
+                    <h3 className="text-sm font-medium text-gray-500">Comentários</h3>
+                  </div>
+                  
+                  {/* Formulário para novo comentário */}
+                  <div className="mb-6">
+                    <textarea
+                      value={novoComentario}
+                      onChange={(e) => setNovoComentario(e.target.value)}
+                      placeholder="Adicione um comentário..."
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                      rows={3}
+                    />
+                    <div className="mt-2 flex justify-end">
+                      <button
+                        onClick={handleAddComentario}
+                        disabled={!novoComentario.trim()}
+                        className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-sm"
+                      >
+                        Adicionar Comentário
+                      </button>
+                    </div>
                   </div>
                 </div>
+              )}
 
-                {/* Lista de comentários */}
-                <div className="space-y-4">
-                  {comentarios.map((comentario) => (
-                    <div key={comentario.id} className="bg-white p-4 rounded-lg border border-gray-200">
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="flex items-center space-x-2">
-                          <span className="font-medium text-gray-900">{comentario.autor}</span>
-                          <span className="text-sm text-gray-500">
-                            {formatarData(comentario.dataCriacao)}
-                          </span>
-                        </div>
-                        {user?.uid === comentario.userId && (
-                          <button
-                            onClick={() => handleDeleteComentario(comentario.id)}
-                            className="text-gray-400 hover:text-red-500 transition-colors"
-                          >
-                            <TrashIcon className="h-4 w-4" />
-                          </button>
-                        )}
+              {/* Lista de comentários */}
+              <div className="space-y-4 mt-4">
+                {comentarios.map((comentario) => (
+                  <div key={comentario.id} className="bg-white p-4 rounded-lg border border-gray-200">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex items-center space-x-2">
+                        <span className="font-medium text-gray-900">{comentario.autor}</span>
+                        <span className="text-sm text-gray-500">
+                          {formatarData(comentario.dataCriacao)}
+                        </span>
                       </div>
-                      <p className="text-gray-700 whitespace-pre-wrap">{comentario.mensagem}</p>
+                      {user?.uid === comentario.userId && solicitacao?.status !== 'concluida' && (
+                        <button
+                          onClick={() => handleDeleteComentario(comentario.id)}
+                          className="text-gray-400 hover:text-red-500 transition-colors"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </button>
+                      )}
                     </div>
-                  ))}
-                </div>
+                    <p className="text-gray-700 whitespace-pre-wrap">{comentario.mensagem}</p>
+                  </div>
+                ))}
               </div>
             </div>
 

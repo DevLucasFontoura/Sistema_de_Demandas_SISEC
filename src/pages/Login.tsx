@@ -87,11 +87,6 @@ function Login() {
               >
                 Entrar
               </button>
-              <div className="text-center mt-4">
-                <a href="/forgot-password" className="text-purple-300 hover:underline">
-                  Esqueceu sua senha?
-                </a>
-              </div>
             </form>
           </div>
         </div>

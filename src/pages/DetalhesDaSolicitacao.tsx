@@ -251,16 +251,39 @@ function DetalhesDaSolicitacaoPage() {
 
     try {
       const solicitacaoRef = doc(db, 'demandas', id);
+      
+      // Busca o perfil do usuário para ter o nome correto
+      const userDoc = await getDoc(doc(db, 'usuarios', user?.uid || ''));
+      const userName = userDoc.exists() ? userDoc.data().nome : 'Usuário';
+      
+      // Atualiza o status da demanda
       await updateDoc(solicitacaoRef, {
         status: 'concluida',
-        dataFinalizacao: new Date().toISOString()
+        dataFinalizacao: Timestamp.now()
+      });
+      
+      // Adiciona o comentário de conclusão com a mensagem correta
+      await updateDoc(solicitacaoRef, {
+        [`comentarios.${Date.now()}`]: {
+          mensagem: `Demanda finalizada pelo usuário: ${userName}`,
+          autor: userName,
+          dataCriacao: Timestamp.now(),
+          userId: user?.uid,
+          arquivos: []
+        }
       });
 
-      await fetchSolicitacao();
-      toast.success('Solicitação concluída com sucesso!');
+      // Feedback visual
+      toast.success('Demanda concluída com sucesso!');
+      
+      // Recarrega os dados
+      await Promise.all([
+        fetchSolicitacao(),
+        fetchComentarios()
+      ]);
     } catch (error) {
-      console.error('Erro ao concluir solicitação:', error);
-      toast.error('Erro ao concluir solicitação');
+      console.error('Erro ao concluir demanda:', error);
+      toast.error('Erro ao concluir demanda. Tente novamente.');
     }
   };
 

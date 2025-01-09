@@ -442,7 +442,7 @@ function DetalhesDaSolicitacaoPage() {
             {/* Coluna da esquerda - Descrição e Comentários */}
             <div className="lg:col-span-2 space-y-6">
               {/* Descrição */}
-              <div className="bg-gray-50 rounded-lg p-6">
+              <div className="bg-gray-200 rounded-lg p-4">
                 <h3 className="text-sm font-medium text-gray-500 mb-3">Descrição</h3>
                 <div className="prose max-w-none">
                   <div className="text-gray-700 whitespace-pre-wrap break-words">
@@ -466,7 +466,7 @@ function DetalhesDaSolicitacaoPage() {
 
               {/* Seção de Comentários */}
               {solicitacao?.status !== 'concluida' && (
-                <div className="bg-gray-50 rounded-lg p-6">
+                <div className="bg-gray-200 rounded-lg p-4">
                   <div className="mb-4">
                     <h3 className="text-sm font-medium text-gray-500">Comentários</h3>
                   </div>
@@ -521,7 +521,7 @@ function DetalhesDaSolicitacaoPage() {
 
             {/* Coluna da direita - Detalhes */}
             <div className="space-y-6">
-              <div className="bg-gray-50 rounded-lg p-6">
+              <div className="bg-gray-200 rounded-lg p-4">
                 <h3 className="text-sm font-medium text-gray-500 mb-4">Detalhes</h3>
                 <div className="space-y-4">
                   <div>

@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getFirestore, doc, getDoc, updateDoc, deleteField, arrayUnion, collection, Timestamp, query, where, orderBy, getDocs, addDoc, deleteDoc } from 'firebase/firestore'
-import type { Solicitacao } from '../components/solicitacao/DetalhesSolicitacao'
+import { getFirestore, doc, getDoc, updateDoc, deleteField, arrayUnion, Timestamp } from 'firebase/firestore'
 import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
 import { ChevronLeftIcon } from '@heroicons/react/24/outline'
 import { StatusBadge } from '../components/StatusBadge'
 import { UrgenciaBadge } from '../components/UrgenciaBadge'
-import { AcoesSolicitacao } from '../components/solicitacao/AcoesSolicitacoes'
 import { TrashIcon } from '@heroicons/react/24/outline'
 import { Dialog, Transition } from '@headlessui/react'
 import { Fragment } from 'react'
@@ -82,7 +80,11 @@ function DetalhesDaSolicitacaoPage() {
       const solicitacaoSnap = await getDoc(solicitacaoRef);
       
       if (solicitacaoSnap.exists()) {
-        setSolicitacao({ id: solicitacaoSnap.id, ...solicitacaoSnap.data() });
+        const data = solicitacaoSnap.data();
+        setSolicitacao({ 
+          ...data,
+          id: solicitacaoSnap.id // Garantindo que o ID está disponível
+        });
       } else {
         toast.error('Solicitação não encontrada');
       }
@@ -365,8 +367,8 @@ function DetalhesDaSolicitacaoPage() {
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-            Detalhes da Solicitação
+          <h1 className="text-2xl font-bold text-blue-500">
+            Detalhes da Solicitação - Nº {solicitacao?.id}
           </h1>
           <p className="text-sm text-gray-500 mt-1">
             Visualize e gerencie os detalhes desta solicitação

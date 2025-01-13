@@ -53,7 +53,8 @@ function DetalhesDaSolicitacaoPage() {
     tipo: '',
     responsavel: '',
     urgencia: '',
-    descricao: ''
+    descricao: '',
+    status: ''
   });
 
   // Ajustando a verificação para "Equipe de TI"
@@ -334,7 +335,8 @@ function DetalhesDaSolicitacaoPage() {
       tipo: solicitacao.tipo,
       responsavel: solicitacao.responsavel || '',
       urgencia: solicitacao.urgencia,
-      descricao: solicitacao.descricao
+      descricao: solicitacao.descricao,
+      status: solicitacao.status
     });
     setIsEditing(true);
   };
@@ -346,7 +348,8 @@ function DetalhesDaSolicitacaoPage() {
       tipo: '',
       responsavel: '',
       urgencia: '',
-      descricao: ''
+      descricao: '',
+      status: ''
     });
   };
 
@@ -360,7 +363,8 @@ function DetalhesDaSolicitacaoPage() {
         tipo: editForm.tipo,
         responsavel: editForm.responsavel,
         urgencia: editForm.urgencia,
-        descricao: editForm.descricao
+        descricao: editForm.descricao,
+        status: editForm.status
       });
 
       // Atualiza o estado local
@@ -488,16 +492,13 @@ function DetalhesDaSolicitacaoPage() {
                 <h2 className="text-xl font-semibold text-gray-900 mb-3">
                   {solicitacao.titulo}
                 </h2>
-                <div className="flex items-center space-x-3">
-                  <StatusBadge status={solicitacao.status} />
-                </div>
               </div>
               
               <div className="flex space-x-3">
                 {solicitacao?.status === 'concluida' && (
                   <button
                     onClick={() => {
-                      console.log('Clicou em reabrir');  // Log para debug
+                      console.log('Clicou em reabrir');
                       handleReopen();
                     }}
                     className="px-4 py-2 text-white bg-gradient-to-r from-blue-400 to-cyan-500 rounded-lg transition-all duration-200 hover:from-blue-500 hover:to-cyan-600 font-medium"
@@ -639,21 +640,39 @@ function DetalhesDaSolicitacaoPage() {
                 <h3 className="text-sm font-medium text-gray-500 mb-4">Detalhes</h3>
                 <div className="space-y-4">
                   <div>
-                    <p className="text-sm text-gray-500">Solicitante</p>
+                    <p className="text-sm text-gray-500">Status</p>
                     {isEditing ? (
-                      <input
-                        type="text"
-                        value={editForm.solicitante}
-                        onChange={(e) => setEditForm(prev => ({ ...prev, solicitante: e.target.value }))}
+                      <select
+                        value={editForm.status}
+                        onChange={(e) => setEditForm(prev => ({ ...prev, status: e.target.value }))}
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      />
+                      >
+                        <option value="pendente">Pendente</option>
+                        <option value="em_andamento">Em Andamento</option>
+                        <option value="concluida">Concluída</option>
+                        <option value="suspenso">Suspenso</option>
+                      </select>
                     ) : (
-                      <p className="text-gray-700 font-medium">{solicitacao.solicitante}</p>
+                      <div className="mt-1">
+                        <StatusBadge status={solicitacao.status} />
+                      </div>
                     )}
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Criado em</p>
-                    <p className="text-gray-700 font-medium">{formatarDataCriacao(solicitacao.createdAt)}</p>
+                    <p className="text-sm text-gray-500">Urgência</p>
+                    {isEditing ? (
+                      <select
+                        value={editForm.urgencia}
+                        onChange={(e) => setEditForm(prev => ({ ...prev, urgencia: e.target.value }))}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      >
+                        <option value="baixa">Baixa</option>
+                        <option value="media">Média</option>
+                        <option value="alta">Alta</option>
+                      </select>
+                    ) : (
+                      <UrgenciaBadge urgencia={solicitacao.urgencia} />
+                    )}
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Tipo</p>
@@ -673,6 +692,25 @@ function DetalhesDaSolicitacaoPage() {
                     )}
                   </div>
                   <div>
+                    <p className="text-sm text-gray-500">Criado em</p>
+                    <p className="text-gray-700 font-medium">{formatarDataCriacao(solicitacao.createdAt)}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Prazo</p>
+                    {isEditing ? (
+                      <input
+                        type="date"
+                        value={solicitacao.prazo}
+                        onChange={(e) => handleUpdate('prazo', e.target.value)}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    ) : (
+                      <p className="text-gray-700 font-medium">
+                        {solicitacao.prazo ? formatarData(solicitacao.prazo) : 'Não definido'}
+                      </p>
+                    )}
+                  </div>
+                  <div>
                     <p className="text-sm text-gray-500">Responsável</p>
                     {isEditing ? (
                       <input
@@ -683,26 +721,6 @@ function DetalhesDaSolicitacaoPage() {
                       />
                     ) : (
                       <p className="text-gray-700 font-medium">{solicitacao.responsavel || 'Não atribuído'}</p>
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Prazo</p>
-                    <p className="text-gray-700 font-medium">{formatarData(solicitacao.prazo)}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Urgência</p>
-                    {isEditing ? (
-                      <select
-                        value={editForm.urgencia}
-                        onChange={(e) => setEditForm(prev => ({ ...prev, urgencia: e.target.value }))}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      >
-                        <option value="baixa">Baixa</option>
-                        <option value="media">Média</option>
-                        <option value="alta">Alta</option>
-                      </select>
-                    ) : (
-                      <UrgenciaBadge urgencia={solicitacao.urgencia} />
                     )}
                   </div>
                 </div>

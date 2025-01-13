@@ -141,10 +141,14 @@ function DetalhesDaSolicitacaoPage() {
       const solicitacaoRef = doc(db, 'demandas', id);
       const timestamp = new Date().toISOString();
       
+      // Get user's name from Firestore
+      const userDoc = await getDoc(doc(db, 'usuarios', user?.uid || ''));
+      const userName = userDoc.exists() ? userDoc.data().nome : user?.email;
+      
       await updateDoc(solicitacaoRef, {
         [`comentarios.${Date.now()}`]: {
           mensagem: novoComentario,
-          autor: user?.displayName || user?.email,
+          autor: userName, // Use the user's name instead of email
           userId: user?.uid,
           dataCriacao: timestamp,
           arquivos: []
@@ -234,27 +238,30 @@ function DetalhesDaSolicitacaoPage() {
     
     try {
       // Se for um Timestamp do Firestore
-      if (data?.seconds) {
+      if (data && typeof data === 'object' && 'seconds' in data) {
         const date = new Date(data.seconds * 1000);
-        const dia = date.getDate().toString().padStart(2, '0');
-        const mes = (date.getMonth() + 1).toString().padStart(2, '0');
-        const ano = date.getFullYear();
-        return `${dia}/${mes}/${ano}`;
+        return date.toLocaleDateString('pt-BR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        });
       }
       
-      // Se for uma data normal
-      if (data instanceof Date) {
-        const dia = data.getDate().toString().padStart(2, '0');
-        const mes = (data.getMonth() + 1).toString().padStart(2, '0');
-        const ano = data.getFullYear();
-        return `${dia}/${mes}/${ano}`;
-      }
-      
-      // Se for uma string no formato YYYY-MM-DD
+      // Se for uma string de data no formato YYYY-MM-DD
       if (typeof data === 'string') {
-        const [ano, mes, dia] = data.split('-');
-        if (ano && mes && dia) {
+        if (data.includes('-')) {
+          const [ano, mes, dia] = data.split('-');
           return `${dia}/${mes}/${ano}`;
+        }
+        
+        // Se for uma string ISO
+        const date = new Date(data);
+        if (!isNaN(date.getTime())) {
+          return date.toLocaleDateString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          });
         }
       }
       
@@ -285,13 +292,31 @@ function DetalhesDaSolicitacaoPage() {
     }
   };
 
-  const formatarDataComentario = (dataString: string) => {
+  const formatarDataComentario = (data: any) => {
     try {
-      const data = new Date(dataString);
-      const dia = data.getDate().toString().padStart(2, '0');
-      const mes = (data.getMonth() + 1).toString().padStart(2, '0');
-      const ano = data.getFullYear();
-      return `${dia}/${mes}/${ano}`;
+      // Se for um Timestamp do Firestore
+      if (data && typeof data === 'object' && 'seconds' in data) {
+        const date = new Date(data.seconds * 1000);
+        return date.toLocaleDateString('pt-BR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        });
+      }
+      
+      // Se for uma string ISO
+      if (typeof data === 'string') {
+        const date = new Date(data);
+        if (!isNaN(date.getTime())) {
+          return date.toLocaleDateString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+          });
+        }
+      }
+      
+      return 'Data inválida';
     } catch (error) {
       console.error('Erro ao formatar data do comentário:', error);
       return 'Data inválida';
@@ -593,7 +618,7 @@ function DetalhesDaSolicitacaoPage() {
                           {formatarDataComentario(comentario.dataCriacao)}
                         </span>
                       </div>
-                      {user?.uid === comentario.userId && solicitacao?.status !== 'concluida' && (
+                      {isAdmin && solicitacao?.status !== 'concluida' && (
                         <button
                           onClick={() => handleDeleteComentario(comentario.id)}
                           className="text-gray-400 hover:text-red-500 transition-colors"

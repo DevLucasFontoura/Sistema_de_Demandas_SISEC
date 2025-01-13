@@ -41,7 +41,7 @@ function Login() {
         {/* Lado Esquerdo - Informações */}
         <div className="lg:w-1/2 text-white lg:pr-16 mb-8 lg:mb-0">
           <div className="max-w-lg">
-            <h1 className="text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-200 to-pink-200">
+            <h1 className="text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-200 to-pink-200 whitespace-nowrap">
               Controle de Demandas
             </h1>
             <h2 className="text-3xl font-semibold mb-8 text-purple-200">

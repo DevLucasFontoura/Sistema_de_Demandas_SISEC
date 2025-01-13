@@ -365,7 +365,7 @@ function DetalhesDaSolicitacaoPage() {
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
             Detalhes da Solicitação
           </h1>
           <p className="text-sm text-gray-500 mt-1">
@@ -374,7 +374,7 @@ function DetalhesDaSolicitacaoPage() {
         </div>
         <button
           onClick={() => navigate('/lista-solicitacoes')}
-          className="flex items-center px-4 py-2 rounded-lg text-gray-300 bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-white transition-all duration-200 group"
+          className="flex items-center px-4 py-2 rounded-lg text-gray-300 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-white transition-all duration-200 group"
         >
           <ChevronLeftIcon className="w-5 h-5 mr-2" />
           Voltar
@@ -415,7 +415,7 @@ function DetalhesDaSolicitacaoPage() {
                   <>
                     <button
                       onClick={handleEdit}
-                      className="px-4 py-2 text-white bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg transition-all duration-200 hover:from-purple-600 hover:to-pink-600 font-medium"
+                      className="px-4 py-2 text-white bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg transition-all duration-200 hover:from-blue-600 hover:to-cyan-600 font-medium"
                     >
                       Editar
                     </button>
@@ -427,7 +427,7 @@ function DetalhesDaSolicitacaoPage() {
                     </button>
                     <button
                       onClick={handleComplete}
-                      className="px-4 py-2 text-white bg-gradient-to-r from-green-400 to-emerald-500 rounded-lg transition-all duration-200 hover:from-green-500 hover:to-emerald-600 font-medium"
+                      className="px-4 py-2 text-white bg-gradient-to-r from-blue-400 to-cyan-500 rounded-lg transition-all duration-200 hover:from-blue-500 hover:to-cyan-600 font-medium"
                     >
                       Marcar como Concluído
                     </button>
@@ -442,7 +442,7 @@ function DetalhesDaSolicitacaoPage() {
             {/* Coluna da esquerda - Descrição e Comentários */}
             <div className="lg:col-span-2 space-y-6">
               {/* Descrição */}
-              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4 border border-gray-200">
+              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-4 border border-gray-200">
                 <h3 className="text-sm font-medium text-gray-500 mb-3">Descrição</h3>
                 <div className="prose max-w-none">
                   <div className="text-gray-700 whitespace-pre-wrap break-words">
@@ -466,7 +466,7 @@ function DetalhesDaSolicitacaoPage() {
 
               {/* Seção de Comentários */}
               {solicitacao?.status !== 'concluida' && (
-                <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4 border border-gray-200">
+                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-4 border border-gray-200">
                   <div className="mb-4">
                     <h3 className="text-sm font-medium text-gray-500">Comentários</h3>
                   </div>
@@ -477,14 +477,13 @@ function DetalhesDaSolicitacaoPage() {
                       value={novoComentario}
                       onChange={(e) => setNovoComentario(e.target.value)}
                       placeholder="Adicione um comentário..."
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                       rows={3}
                     />
                     <div className="mt-2 flex justify-end">
                       <button
                         onClick={handleAddComentario}
-                        disabled={!novoComentario.trim()}
-                        className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-sm"
+                        className="px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:from-blue-600 hover:to-cyan-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                       >
                         Adicionar Comentário
                       </button>
@@ -521,7 +520,7 @@ function DetalhesDaSolicitacaoPage() {
 
             {/* Coluna da direita - Detalhes */}
             <div className="space-y-6">
-              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4 border border-gray-200">
+              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-4 border border-gray-200">
                 <h3 className="text-sm font-medium text-gray-500 mb-4">Detalhes</h3>
                 <div className="space-y-4">
                   <div>

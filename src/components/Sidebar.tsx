@@ -45,7 +45,7 @@ function Sidebar() {
   return (
     <div className="flex flex-col w-64 bg-gradient-to-b from-gray-900 to-gray-800 min-h-screen text-white">
       <div className="p-[0.9rem] border-b border-gray-700/50">
-        <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+        <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
           Controle de Demandas
         </h1>
       </div>
@@ -53,7 +53,7 @@ function Sidebar() {
       <div className="p-6 border-b border-gray-700/50 bg-gray-800/50 backdrop-blur-sm">
         <div className="flex flex-col">
           <div className="flex items-center space-x-4 mb-2">
-            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg">
               <span className="text-lg font-semibold">
                 {user?.nome?.charAt(0) || user?.email?.charAt(0)?.toUpperCase()}
               </span>
@@ -67,7 +67,7 @@ function Sidebar() {
             <span className="text-xs text-gray-400">
               {user?.email}
             </span>
-            <span className="text-xs px-2 py-0.5 bg-purple-500/20 text-purple-200 rounded-full inline-flex items-center w-fit">
+            <span className="text-xs px-2 py-0.5 bg-blue-500/20 text-blue-200 rounded-full inline-flex items-center w-fit">
               {getTipoUsuario(user?.role)}
             </span>
           </div>
@@ -81,12 +81,12 @@ function Sidebar() {
             to={item.path}
             className={`flex items-center px-4 py-3 mb-2 rounded-lg text-gray-300 hover:bg-white/10 transition-all duration-200 group ${
               isActive(item.path) 
-                ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-white shadow-sm' 
+                ? 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-white shadow-sm' 
                 : ''
             }`}
           >
             <item.icon className={`w-5 h-5 mr-3 transition-transform duration-200 group-hover:scale-110 ${
-              isActive(item.path) ? 'text-purple-400' : ''
+              isActive(item.path) ? 'text-blue-400' : ''
             }`} />
             <span className="text-sm font-medium">{item.label}</span>
           </Link>
@@ -96,7 +96,7 @@ function Sidebar() {
       <div className="p-4 mt-auto">
         <button
           onClick={handleLogout}
-          className="flex items-center justify-center w-full px-4 py-3 rounded-lg text-gray-300 bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-white transition-all duration-200 group"
+          className="flex items-center justify-center w-full px-4 py-3 rounded-lg text-gray-300 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-white transition-all duration-200 group"
         >
           <ArrowLeftOnRectangleIcon className="w-5 h-5 mr-2 transition-transform duration-200 group-hover:-translate-x-1" />
           <span className="text-sm font-medium">Sair</span>

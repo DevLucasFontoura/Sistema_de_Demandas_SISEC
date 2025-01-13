@@ -80,7 +80,7 @@ function NovaSolicitacao() {
     <div className="p-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <h1 className="text-3xl font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600">
+        <h1 className="text-3xl font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400">
           Nova Solicitação
         </h1>
 
@@ -95,7 +95,7 @@ function NovaSolicitacao() {
                 </label>
                 <input
                   type="text"
-                  className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200"
+                  className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200"
                   value={formData.titulo}
                   onChange={(e) => setFormData(prev => ({ ...prev, titulo: e.target.value }))}
                   placeholder="Digite o título da solicitação"
@@ -110,7 +110,7 @@ function NovaSolicitacao() {
                     Tipo da Demanda
                   </label>
                   <select
-                    className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200"
+                    className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200"
                     value={formData.tipo}
                     onChange={(e) => setFormData(prev => ({ ...prev, tipo: e.target.value as TipoDemanda }))}
                   >
@@ -125,7 +125,7 @@ function NovaSolicitacao() {
                     Urgência
                   </label>
                   <select
-                    className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200"
+                    className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200"
                     value={formData.urgencia}
                     onChange={(e) => setFormData(prev => ({ ...prev, urgencia: e.target.value as Urgencia }))}
                   >
@@ -145,7 +145,7 @@ function NovaSolicitacao() {
                   </label>
                   <input
                     type="date"
-                    className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200"
+                    className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200"
                     value={formData.prazo}
                     onChange={(e) => setFormData(prev => ({ ...prev, prazo: e.target.value }))}
                     min={new Date().toISOString().split('T')[0]}
@@ -159,7 +159,7 @@ function NovaSolicitacao() {
                   </label>
                   <input
                     type="text"
-                    className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200"
+                    className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200"
                     value={formData.solicitante}
                     onChange={(e) => setFormData(prev => ({ ...prev, solicitante: e.target.value }))}
                     placeholder="Digite o nome do solicitante"
@@ -173,7 +173,7 @@ function NovaSolicitacao() {
                   Descrição da Demanda
                 </label>
                 <textarea
-                  className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200 min-h-[120px]"
+                  className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 min-h-[120px]"
                   rows={4}
                   value={formData.descricao}
                   onChange={(e) => setFormData(prev => ({ ...prev, descricao: e.target.value }))}
@@ -192,7 +192,7 @@ function NovaSolicitacao() {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-md hover:shadow-lg"
+                  className="px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:from-blue-600 hover:to-cyan-600 transition-all duration-200 shadow-md hover:shadow-lg"
                 >
                   Criar Solicitação
                 </button>

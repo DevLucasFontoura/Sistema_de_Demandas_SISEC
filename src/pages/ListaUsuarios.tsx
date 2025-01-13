@@ -98,7 +98,7 @@ function ListaUsuarios() {
     <div className="p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <h1 className="text-3xl font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600">
+        <h1 className="text-3xl font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400">
           Lista de Usuários
         </h1>
 
@@ -106,7 +106,7 @@ function ListaUsuarios() {
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
           {loading ? (
             <div className="p-8 text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
               <p className="mt-4 text-gray-600">Carregando usuários...</p>
             </div>
           ) : (
@@ -161,7 +161,7 @@ function ListaUsuarios() {
                         <div className="flex space-x-3">
                           <button
                             onClick={() => handleResetPassword(usuario.email)}
-                            className="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-sm hover:shadow-md"
+                            className="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 transition-all duration-200 shadow-sm hover:shadow-md"
                           >
                             Resetar Senha
                           </button>

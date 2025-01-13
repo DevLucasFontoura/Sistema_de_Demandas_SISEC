@@ -229,7 +229,7 @@ function ListaSolicitacoes() {
   return (
     <div className="p-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
           Lista de Solicitações
         </h1>
         
@@ -243,7 +243,7 @@ function ListaSolicitacoes() {
               placeholder="Buscar por ID, solicitante ou título..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2.5 bg-white/5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 w-96 transition-all duration-200"
+              className="pl-10 pr-4 py-2.5 bg-white/5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-96 transition-all duration-200"
             />
           </div>
         </div>
@@ -284,7 +284,7 @@ function ListaSolicitacoes() {
               {filteredSolicitacoes.map((solicitacao) => (
                 <tr 
                   key={solicitacao.id} 
-                  className="hover:bg-gray-50/50 transition-colors duration-150"
+                  className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 transition-colors duration-150"
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <Link

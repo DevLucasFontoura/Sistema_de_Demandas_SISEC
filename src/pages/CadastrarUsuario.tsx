@@ -60,7 +60,7 @@ function CadastrarUsuario() {
     <div className="p-8">
       <div className="max-w-3xl mx-auto">
         {/* Header */}
-        <h1 className="text-3xl font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600">
+        <h1 className="text-3xl font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400">
           Cadastrar Usuário
         </h1>
 
@@ -75,7 +75,7 @@ function CadastrarUsuario() {
                 </label>
                 <input
                   type="text"
-                  className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200"
+                  className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200"
                   value={formData.nome}
                   onChange={(e) => setFormData(prev => ({ ...prev, nome: e.target.value }))}
                   placeholder="Digite o nome do usuário"
@@ -89,7 +89,7 @@ function CadastrarUsuario() {
                 </label>
                 <input
                   type="email"
-                  className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200"
+                  className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200"
                   value={formData.email}
                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                   placeholder="Digite o email do usuário"
@@ -102,7 +102,7 @@ function CadastrarUsuario() {
                   Tipo de Usuário
                 </label>
                 <select
-                  className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200"
+                  className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200"
                   value={formData.tipo}
                   onChange={(e) => setFormData(prev => ({ ...prev, tipo: e.target.value as UsuarioForm['tipo'] }))}
                 >
@@ -123,7 +123,7 @@ function CadastrarUsuario() {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-md hover:shadow-lg"
+                  className="px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:from-blue-600 hover:to-cyan-600 transition-all duration-200 shadow-md hover:shadow-lg"
                 >
                   Cadastrar Usuário
                 </button>

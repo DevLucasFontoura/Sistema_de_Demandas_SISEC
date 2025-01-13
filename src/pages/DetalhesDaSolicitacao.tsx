@@ -62,7 +62,6 @@ function DetalhesDaSolicitacaoPage() {
         if (userDoc.exists()) {
           const userData = userDoc.data();
           setUserProfile(userData);
-          console.log('Perfil do usuário:', userData); // Log para debug
         }
       } catch (error) {
         console.error('Erro ao buscar perfil do usuário:', error);
@@ -259,6 +258,26 @@ function DetalhesDaSolicitacaoPage() {
     }
   };
 
+  const formatarDataCriacao = (data: any) => {
+    if (!data) return 'Não definido';
+    
+    try {
+      // Se for um Timestamp do Firestore
+      if (data?.seconds) {
+        const date = new Date(data.seconds * 1000);
+        const dia = date.getDate().toString().padStart(2, '0');
+        const mes = (date.getMonth() + 1).toString().padStart(2, '0');
+        const ano = date.getFullYear();
+        return `${dia}/${mes}/${ano}`;
+      }
+      
+      return 'Data inválida';
+    } catch (error) {
+      console.error('Erro ao formatar data:', error);
+      return 'Data inválida';
+    }
+  };
+
   useEffect(() => {
     fetchSolicitacao();
     fetchComentarios();
@@ -394,10 +413,6 @@ function DetalhesDaSolicitacaoPage() {
                 </h2>
                 <div className="flex items-center space-x-3">
                   <StatusBadge status={solicitacao.status} />
-                  <span className="text-sm text-gray-500">•</span>
-                  <span className="text-sm text-gray-500">
-                    Criado em {formatarData(solicitacao.dataCriacao)}
-                  </span>
                 </div>
               </div>
               
@@ -528,6 +543,10 @@ function DetalhesDaSolicitacaoPage() {
                   <div>
                     <p className="text-sm text-gray-500">Solicitante</p>
                     <p className="text-gray-700 font-medium">{solicitacao.solicitante}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Criado em</p>
+                    <p className="text-gray-700 font-medium">{formatarDataCriacao(solicitacao.createdAt)}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Tipo</p>

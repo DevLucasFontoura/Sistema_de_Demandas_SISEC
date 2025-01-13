@@ -28,7 +28,7 @@ export function StatusBadge({ status }: { status: Demanda['status'] }) {
     pendente: 'bg-yellow-100 text-yellow-800 border border-yellow-200',
     em_andamento: 'bg-blue-100 text-blue-800 border border-blue-200',
     concluida: 'bg-green-100 text-green-800 border border-green-200',
-    suspenso: 'bg-gray-100 text-gray-800 border border-gray-200'
+    suspenso: 'bg-red-100 text-red-800 border border-red-200'
   }
 
   const icons = {
@@ -226,6 +226,101 @@ function ListaSolicitacoes() {
     navigate(`/detalhes-solicitacao/${id}`);
   };
 
+  const renderStatusSection = (status: string, title: string) => {
+    const filteredByStatus = filteredSolicitacoes.filter(s => s.status === status);
+    
+    if (filteredByStatus.length === 0) return null;
+
+    return (
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">{title}</h2>
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Nº
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Solicitante
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Tipo
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Urgência
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Prazo
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Responsável
+                  </th>
+                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Ações
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredByStatus.map((solicitacao) => (
+                  <tr 
+                    key={solicitacao.id} 
+                    className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 transition-colors duration-150"
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <Link
+                        to={`/detalhes-solicitacao/${solicitacao.id}`}
+                        className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                      >
+                        {solicitacao.id}
+                      </Link>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {solicitacao.solicitante}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-600">
+                        {solicitacao.tipo === 'desenvolvimento' ? 'Desenvolvimento' : 'Dados'}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <UrgenciaBadge urgencia={solicitacao.urgencia} />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <StatusBadge status={solicitacao.status} />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                      {solicitacao.prazo ? formatarData(solicitacao.prazo) : 'N/A'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                      {solicitacao.responsavel || 'N/A'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      {isAdmin && (
+                        <button
+                          onClick={() => handleDelete(solicitacao.id)}
+                          className="text-gray-400 hover:text-red-500 transition-colors"
+                        >
+                          <TrashIcon className="h-5 w-5" />
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="p-8">
       <div className="flex justify-between items-center mb-8">
@@ -249,89 +344,10 @@ function ListaSolicitacoes() {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Nº
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Solicitante
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Tipo
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Urgência
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Prazo
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Responsável
-                </th>
-                <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Ações
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredSolicitacoes.map((solicitacao) => (
-                <tr 
-                  key={solicitacao.id} 
-                  className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 transition-colors duration-150"
-                >
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <Link
-                      to={`/detalhes-solicitacao/${solicitacao.id}`}
-                      className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
-                    >
-                      {solicitacao.id}
-                    </Link>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      {solicitacao.solicitante}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-600">
-                      {solicitacao.tipo === 'desenvolvimento' ? 'Desenvolvimento' : 'Dados'}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <UrgenciaBadge urgencia={solicitacao.urgencia} />
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <StatusBadge status={solicitacao.status} />
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {solicitacao.prazo ? formatarData(solicitacao.prazo) : 'N/A'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {solicitacao.responsavel || 'N/A'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                    {isAdmin && (
-                      <button
-                        onClick={() => handleDelete(solicitacao.id)}
-                        className="text-gray-400 hover:text-red-500 transition-colors"
-                      >
-                        <TrashIcon className="h-5 w-5" />
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {renderStatusSection('pendente', 'Pendentes')}
+      {renderStatusSection('em_andamento', 'Em Andamento')}
+      {renderStatusSection('concluida', 'Concluídas')}
+      {renderStatusSection('suspenso', 'Suspensas')}
 
       {filteredSolicitacoes.length === 0 && (
         <div className="text-center py-12">

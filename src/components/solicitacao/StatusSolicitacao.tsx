@@ -9,13 +9,13 @@ export function StatusSolicitacao({ status }: StatusSolicitacaoProps) {
   const getStatusIcon = () => {
     switch (status) {
       case 'pendente':
-        return <XCircleIcon className="w-6 h-6 text-red-500" />
+        return <XCircleIcon className="w-6 h-6 text-yellow-500" />
       case 'em_andamento':
-        return <ClockIcon className="w-6 h-6 text-yellow-500" />
+        return <ClockIcon className="w-6 h-6 text-blue-500" />
       case 'concluida':
         return <CheckCircleIcon className="w-6 h-6 text-green-500" />
       case 'suspenso':
-        return <StopCircleIcon className="w-6 h-6 text-gray-500" />
+        return <StopCircleIcon className="w-6 h-6 text-red-500" />
     }
   }
 

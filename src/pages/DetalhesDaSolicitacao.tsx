@@ -48,6 +48,13 @@ function DetalhesDaSolicitacaoPage() {
   const [justificativaAdiamento, setJustificativaAdiamento] = useState('')
   const [novaData, setNovaData] = useState('')
   const [userProfile, setUserProfile] = useState<any>(null)
+  const [editForm, setEditForm] = useState({
+    solicitante: '',
+    tipo: '',
+    responsavel: '',
+    urgencia: '',
+    descricao: ''
+  });
 
   // Ajustando a verificação para "Equipe de TI"
   const isEquipeTI = userProfile?.perfil === "Equipe de TI";
@@ -297,19 +304,51 @@ function DetalhesDaSolicitacaoPage() {
   }, [id]);
 
   const handleEdit = () => {
+    setEditForm({
+      solicitante: solicitacao.solicitante,
+      tipo: solicitacao.tipo,
+      responsavel: solicitacao.responsavel || '',
+      urgencia: solicitacao.urgencia,
+      descricao: solicitacao.descricao
+    });
     setIsEditing(true);
   };
 
   const handleCancel = () => {
     setIsEditing(false);
+    setEditForm({
+      solicitante: '',
+      tipo: '',
+      responsavel: '',
+      urgencia: '',
+      descricao: ''
+    });
   };
 
   const handleSave = async () => {
+    if (!solicitacao?.id) return;
+
     try {
-      // Aqui você implementa a lógica de salvar as alterações
+      const solicitacaoRef = doc(db, 'demandas', solicitacao.id);
+      await updateDoc(solicitacaoRef, {
+        solicitante: editForm.solicitante,
+        tipo: editForm.tipo,
+        responsavel: editForm.responsavel,
+        urgencia: editForm.urgencia,
+        descricao: editForm.descricao
+      });
+
+      // Atualiza o estado local
+      setSolicitacao({
+        ...solicitacao,
+        ...editForm
+      });
+
       setIsEditing(false);
+      toast.success('Solicitação atualizada com sucesso!');
     } catch (error) {
-      console.error('Erro ao salvar alterações:', error);
+      console.error('Erro ao atualizar solicitação:', error);
+      toast.error('Erro ao atualizar solicitação');
     }
   };
 
@@ -444,23 +483,35 @@ function DetalhesDaSolicitacaoPage() {
                 {solicitacao?.status !== 'concluida' && (
                   <>
                     <button
-                      onClick={handleEdit}
+                      onClick={isEditing ? handleSave : handleEdit}
                       className="px-4 py-2 text-white bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg transition-all duration-200 hover:from-blue-600 hover:to-cyan-600 font-medium"
                     >
-                      Editar
+                      {isEditing ? 'Salvar' : 'Editar'}
                     </button>
-                    <button
-                      onClick={() => setIsAdiamentoModalOpen(true)}
-                      className="px-4 py-2 text-white bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg transition-all duration-200 hover:from-yellow-500 hover:to-orange-600 font-medium"
-                    >
-                      Solicitar Adiamento
-                    </button>
-                    <button
-                      onClick={handleComplete}
-                      className="px-4 py-2 text-white bg-gradient-to-r from-blue-400 to-cyan-500 rounded-lg transition-all duration-200 hover:from-blue-500 hover:to-cyan-600 font-medium"
-                    >
-                      Marcar como Concluído
-                    </button>
+                    {isEditing && (
+                      <button
+                        onClick={handleCancel}
+                        className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                      >
+                        Cancelar
+                      </button>
+                    )}
+                    {!isEditing && (
+                      <>
+                        <button
+                          onClick={() => setIsAdiamentoModalOpen(true)}
+                          className="px-4 py-2 text-white bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg transition-all duration-200 hover:from-yellow-500 hover:to-orange-600 font-medium"
+                        >
+                          Solicitar Adiamento
+                        </button>
+                        <button
+                          onClick={handleComplete}
+                          className="px-4 py-2 text-white bg-gradient-to-r from-blue-400 to-cyan-500 rounded-lg transition-all duration-200 hover:from-blue-500 hover:to-cyan-600 font-medium"
+                        >
+                          Marcar como Concluído
+                        </button>
+                      </>
+                    )}
                   </>
                 )}
               </div>
@@ -476,7 +527,16 @@ function DetalhesDaSolicitacaoPage() {
                 <h3 className="text-sm font-medium text-gray-500 mb-3">Descrição</h3>
                 <div className="prose max-w-none">
                   <div className="text-gray-700 whitespace-pre-wrap break-words">
-                    {solicitacao.descricao}
+                    {isEditing ? (
+                      <textarea
+                        value={editForm.descricao}
+                        onChange={(e) => setEditForm(prev => ({ ...prev, descricao: e.target.value }))}
+                        rows={3}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    ) : (
+                      <p className="text-gray-700 whitespace-pre-wrap">{solicitacao.descricao}</p>
+                    )}
                   </div>
                   {solicitacao.link && (
                     <div className="mt-4">
@@ -555,7 +615,16 @@ function DetalhesDaSolicitacaoPage() {
                 <div className="space-y-4">
                   <div>
                     <p className="text-sm text-gray-500">Solicitante</p>
-                    <p className="text-gray-700 font-medium">{solicitacao.solicitante}</p>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={editForm.solicitante}
+                        onChange={(e) => setEditForm(prev => ({ ...prev, solicitante: e.target.value }))}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    ) : (
+                      <p className="text-gray-700 font-medium">{solicitacao.solicitante}</p>
+                    )}
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Criado em</p>
@@ -563,13 +632,33 @@ function DetalhesDaSolicitacaoPage() {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Tipo</p>
-                    <p className="text-gray-700 font-medium">
-                      {solicitacao.tipo === 'desenvolvimento' ? 'Desenvolvimento' : 'Dados'}
-                    </p>
+                    {isEditing ? (
+                      <select
+                        value={editForm.tipo}
+                        onChange={(e) => setEditForm(prev => ({ ...prev, tipo: e.target.value }))}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      >
+                        <option value="desenvolvimento">Desenvolvimento</option>
+                        <option value="dados">Dados</option>
+                      </select>
+                    ) : (
+                      <p className="text-gray-700 font-medium">
+                        {solicitacao.tipo === 'desenvolvimento' ? 'Desenvolvimento' : 'Dados'}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Responsável</p>
-                    <p className="text-gray-700 font-medium">{solicitacao.responsavel || 'Não atribuído'}</p>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={editForm.responsavel}
+                        onChange={(e) => setEditForm(prev => ({ ...prev, responsavel: e.target.value }))}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    ) : (
+                      <p className="text-gray-700 font-medium">{solicitacao.responsavel || 'Não atribuído'}</p>
+                    )}
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Prazo</p>
@@ -577,9 +666,19 @@ function DetalhesDaSolicitacaoPage() {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Urgência</p>
-                    <div className="mt-1">
+                    {isEditing ? (
+                      <select
+                        value={editForm.urgencia}
+                        onChange={(e) => setEditForm(prev => ({ ...prev, urgencia: e.target.value }))}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      >
+                        <option value="baixa">Baixa</option>
+                        <option value="media">Média</option>
+                        <option value="alta">Alta</option>
+                      </select>
+                    ) : (
                       <UrgenciaBadge urgencia={solicitacao.urgencia} />
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>

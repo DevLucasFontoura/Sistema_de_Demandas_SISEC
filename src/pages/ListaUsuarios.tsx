@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore'
-import { getAuth, updateUser, signInWithEmailAndPassword } from 'firebase/auth'
+import { getAuth} from 'firebase/auth'
 import { db } from '../services/firebaseConfig'
 import { toast } from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'

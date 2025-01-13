@@ -6,7 +6,7 @@ import {
   MagnifyingGlassIcon,
   TrashIcon
 } from '@heroicons/react/24/outline'
-import { getFirestore, collection, getDocs, deleteDoc, doc, orderBy, query } from 'firebase/firestore'
+import { getFirestore, collection, getDocs, deleteDoc, doc } from 'firebase/firestore'
 import { useAuth } from '../context/AuthContext'
 import Swal from 'sweetalert2'
 import { toast } from 'react-hot-toast'
@@ -221,10 +221,6 @@ function ListaSolicitacoes() {
       }
     }
   }
-
-  const handleNavigateToDetails = (id: string) => {
-    navigate(`/detalhes-solicitacao/${id}`);
-  };
 
   const renderStatusSection = (status: string, title: string) => {
     const filteredByStatus = filteredSolicitacoes.filter(s => s.status === status);

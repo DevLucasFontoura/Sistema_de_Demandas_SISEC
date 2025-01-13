@@ -8,6 +8,7 @@ import ListaSolicitacoes from './pages/ListaSolicitacoes'
 import DetalhesSolicitacao from './pages/DetalhesDaSolicitacao'
 import CadastrarUsuario from './pages/CadastrarUsuario'
 import ListaUsuarios from './pages/ListaUsuarios'
+import PainelDemandas from './pages/PainelDemandas'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
                     <Route path="dashboard" element={<Dashboard />} />
                     <Route path="nova-solicitacao" element={<NovaSolicitacao />} />
                     <Route path="lista-solicitacoes" element={<ListaSolicitacoes />} />
+                    <Route path="painel-demandas" element={<PainelDemandas />} />
                     <Route path="detalhes-solicitacao/:id" element={<DetalhesSolicitacao />} />
                     <Route path="cadastrar-usuario" element={<CadastrarUsuario />} />
                     <Route path="lista-usuarios" element={<ListaUsuarios />} />

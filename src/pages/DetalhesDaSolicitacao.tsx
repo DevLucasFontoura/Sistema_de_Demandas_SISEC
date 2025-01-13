@@ -278,6 +278,19 @@ function DetalhesDaSolicitacaoPage() {
     }
   };
 
+  const formatarDataComentario = (dataString: string) => {
+    try {
+      const data = new Date(dataString);
+      const dia = data.getDate().toString().padStart(2, '0');
+      const mes = (data.getMonth() + 1).toString().padStart(2, '0');
+      const ano = data.getFullYear();
+      return `${dia}/${mes}/${ano}`;
+    } catch (error) {
+      console.error('Erro ao formatar data do comentário:', error);
+      return 'Data inválida';
+    }
+  };
+
   useEffect(() => {
     fetchSolicitacao();
     fetchComentarios();
@@ -517,7 +530,7 @@ function DetalhesDaSolicitacaoPage() {
                       <div className="flex items-center space-x-2">
                         <span className="font-medium text-gray-900">{comentario.autor}</span>
                         <span className="text-sm text-gray-500">
-                          {formatarData(comentario.dataCriacao)}
+                          {formatarDataComentario(comentario.dataCriacao)}
                         </span>
                       </div>
                       {user?.uid === comentario.userId && solicitacao?.status !== 'concluida' && (

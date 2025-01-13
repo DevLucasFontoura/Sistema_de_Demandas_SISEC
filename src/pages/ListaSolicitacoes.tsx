@@ -275,11 +275,9 @@ function ListaSolicitacoes() {
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Responsável
                 </th>
-                {isAdmin && (
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Ações
-                  </th>
-                )}
+                <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Ações
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -318,17 +316,11 @@ function ListaSolicitacoes() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                     {solicitacao.responsavel || 'N/A'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      onClick={() => handleNavigateToDetails(solicitacao.id)}
-                      className="text-primary-600 hover:text-primary-900 mr-4"
-                    >
-                      Ver Detalhes
-                    </button>
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
                     {isAdmin && (
                       <button
                         onClick={() => handleDelete(solicitacao.id)}
-                        className="text-red-600 hover:text-red-900"
+                        className="text-gray-400 hover:text-red-500 transition-colors"
                       >
                         <TrashIcon className="h-5 w-5" />
                       </button>

@@ -4,10 +4,8 @@ import { ChevronLeftIcon } from '@heroicons/react/24/outline'
 import { useNavigate } from 'react-router-dom'
 import { StatusSolicitacao } from './StatusSolicitacao'
 import { AcoesSolicitacao } from './AcoesSolicitacoes'
-import { ComentariosSolicitacao } from './ComentariosSolicitacao'
-import { AdiamentoSolicitacao } from './AdiamentoSolicitacao'
 import { toast } from 'react-hot-toast'
-import { formatDate } from '../../utils/date'
+import { useAuth } from '../../context/AuthContext'
 
 interface Arquivo {
   id: string
@@ -58,6 +56,9 @@ export function DetalhesSolicitacao({
   const navigate = useNavigate()
   const [isEditing, setIsEditing] = useState(false)
   const [solicitacao, setSolicitacao] = useState(initialSolicitacao)
+  const { user } = useAuth()
+  
+  const isAdminOrTI = user?.role === 'adm' || user?.role === 'equipe_ti'
 
   const handleEdit = () => {
     setIsEditing(true)
@@ -334,11 +335,13 @@ export function DetalhesSolicitacao({
                 </button>
               </>
             ) : (
-              <AcoesSolicitacao
-                status={solicitacao.status}
-                onEdit={handleEdit}
-                onComplete={onComplete}
-              />
+              isAdminOrTI && (
+                <AcoesSolicitacao
+                  status={solicitacao.status}
+                  onEdit={handleEdit}
+                  onComplete={onComplete}
+                />
+              )
             )}
           </div>
         </div>

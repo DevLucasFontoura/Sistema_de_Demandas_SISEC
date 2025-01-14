@@ -24,24 +24,24 @@ interface Comentario {
 
 const firestore = getFirestore()
 
-// interface Solicitacao {
-//   id: string
-//   solicitante: string
-//   tipo: string
-//   urgencia: string
-//   status: string
-//   prazo: string
-//   descricao: string
-//   titulo: string
-//   responsavel?: string
-// }
+interface Solicitacao {
+  id: string
+  solicitante: string
+  tipo: 'desenvolvimento' | 'dados' | 'suporte_tecnico' | 'infraestrutura_ti' | 'outros'
+  urgencia: string
+  status: string
+  prazo: string
+  descricao: string
+  titulo: string
+  responsavel?: string
+}
 
 function DetalhesDaSolicitacaoPage() {
   const { id } = useParams<{ id: string }>()
   const { user } = useAuth()
   const [solicitacao, setSolicitacao] = useState<any>(null)
   const [comentarios, setComentarios] = useState<any[]>([])
-  const isAdmin = user?.role === 'adm' || user?.role === 'ti'
+  const isAdminOrTI = user?.role === 'adm' || user?.role === 'equipe_ti'
   const navigate = useNavigate()
   const [isEditing, setIsEditing] = useState(false)
   const [novoComentario, setNovoComentario] = useState('')
@@ -496,18 +496,15 @@ function DetalhesDaSolicitacaoPage() {
               </div>
               
               <div className="flex space-x-3">
-                {solicitacao?.status === 'concluida' && (
+                {solicitacao?.status === 'concluida' && isAdminOrTI && (
                   <button
-                    onClick={() => {
-                      console.log('Clicou em reabrir');
-                      handleReopen();
-                    }}
+                    onClick={handleReopen}
                     className="px-4 py-2 text-white bg-gradient-to-r from-blue-400 to-cyan-500 rounded-lg transition-all duration-200 hover:from-blue-500 hover:to-cyan-600 font-medium"
                   >
                     Reabrir Demanda
                   </button>
                 )}
-                {solicitacao?.status !== 'concluida' && (
+                {solicitacao?.status !== 'concluida' && isAdminOrTI && (
                   <>
                     <button
                       onClick={isEditing ? handleSave : handleEdit}
@@ -515,14 +512,7 @@ function DetalhesDaSolicitacaoPage() {
                     >
                       {isEditing ? 'Salvar' : 'Editar'}
                     </button>
-                    {isEditing && (
-                      <button
-                        onClick={handleCancel}
-                        className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                      >
-                        Cancelar
-                      </button>
-                    )}
+                    
                     {!isEditing && (
                       <>
                         <button
@@ -620,7 +610,7 @@ function DetalhesDaSolicitacaoPage() {
                           {formatarDataComentario(comentario.dataCriacao)}
                         </span>
                       </div>
-                      {isAdmin && solicitacao?.status !== 'concluida' && (
+                      {isAdminOrTI && solicitacao?.status !== 'concluida' && (
                         <button
                           onClick={() => handleDeleteComentario(comentario.id)}
                           className="text-gray-400 hover:text-red-500 transition-colors"

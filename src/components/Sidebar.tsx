@@ -11,10 +11,10 @@ function Sidebar() {
   const baseMenuItems = [
     { path: '/painel-demandas', icon: ViewColumnsIcon, label: 'Painel de Demandas' },
     { path: '/lista-solicitacoes', icon: ClipboardDocumentListIcon, label: 'Solicitações' },
-    { path: '/nova-solicitacao', icon: PlusCircleIcon, label: 'Nova Solicitação' },
   ]
-
+  
   const adminMenuItems = [
+    { path: '/nova-solicitacao', icon: PlusCircleIcon, label: 'Nova Solicitação' },
     { path: '/cadastrar-usuario', icon: UserPlusIcon, label: 'Cadastrar Usuário' },
     { path: '/lista-usuarios', icon: UserPlusIcon, label: 'Lista de Usuários' },
   ]

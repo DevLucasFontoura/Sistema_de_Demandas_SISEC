@@ -16,11 +16,12 @@ const firestore = getFirestore()
 interface Demanda {
   id: string
   solicitante: string
-  tipo: 'desenvolvimento' | 'dados'
+  tipo: 'desenvolvimento' | 'dados' | 'suporte' | 'infraestrutura' | 'outros'
   urgencia: 'baixa' | 'media' | 'alta'
-  status: 'pendente' | 'em_andamento' | 'concluida'
+  status: 'pendente' | 'em_andamento' | 'concluida' | 'suspenso'
   prazo: string
   responsavel: string
+  titulo: string
 }
 
 export function StatusBadge({ status }: { status: Demanda['status'] }) {
@@ -85,6 +86,17 @@ const formatStatus = (status: string) => {
     suspenso: 'Suspenso'
   }
   return statusMap[status as keyof typeof statusMap] || status
+}
+
+const formatarTipo = (tipo: string) => {
+  const tiposMap = {
+    desenvolvimento: 'Desenvolvimento',
+    dados: 'Dados',
+    suporte: 'Suporte',
+    infraestrutura: 'Infraestrutura',
+    outros: 'Outros'
+  }
+  return tiposMap[tipo as keyof typeof tiposMap] || tipo
 }
 
 function ListaSolicitacoes() {
@@ -282,7 +294,7 @@ function ListaSolicitacoes() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-600">
-                        {solicitacao.tipo === 'desenvolvimento' ? 'Desenvolvimento' : 'Dados'}
+                        {formatarTipo(solicitacao.tipo)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

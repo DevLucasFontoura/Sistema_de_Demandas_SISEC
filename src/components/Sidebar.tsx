@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { HomeIcon, PlusCircleIcon, ClipboardDocumentListIcon, ArrowLeftOnRectangleIcon, UserPlusIcon, ViewColumnsIcon } from '@heroicons/react/24/outline'
+import { HomeIcon, PlusCircleIcon, ClipboardDocumentListIcon, ArrowLeftOnRectangleIcon, UserPlusIcon, ViewColumnsIcon, ChartBarIcon } from '@heroicons/react/24/outline'
 import { useAuth } from '../context/AuthContext'
 
 function Sidebar() {
@@ -11,6 +11,7 @@ function Sidebar() {
   const baseMenuItems = [
     { path: '/painel-demandas', icon: ViewColumnsIcon, label: 'Painel de Demandas' },
     { path: '/lista-solicitacoes', icon: ClipboardDocumentListIcon, label: 'Solicitações' },
+    { path: '/dashboard', icon: ChartBarIcon, label: 'Dashboard' },
   ]
   
   const adminMenuItems = [

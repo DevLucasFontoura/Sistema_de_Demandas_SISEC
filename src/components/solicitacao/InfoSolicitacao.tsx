@@ -29,6 +29,17 @@ export function InfoSolicitacao({ solicitacao, isEditing, onUpdate }: InfoSolici
     return `${dia} / ${mes} / ${ano}`
   }
 
+  const formatTipo = (tipo: string) => {
+    const tipos = {
+      desenvolvimento: 'Desenvolvimento',
+      dados: 'Dados',
+      suporte: 'Suporte',
+      infraestrutura: 'Infraestrutura',
+      outros: 'Outros'
+    }
+    return tipos[tipo as keyof typeof tipos] || tipo
+  }
+
   const renderField = (label: string, field: keyof Solicitacao, disabled = false) => {
     if (field === 'status' && isEditing) {
       return (
@@ -42,6 +53,26 @@ export function InfoSolicitacao({ solicitacao, isEditing, onUpdate }: InfoSolici
             <option value="pendente">Pendente</option>
             <option value="em_andamento">Em Andamento</option>
             <option value="concluida">Concluída</option>
+            <option value="suspenso">Suspenso</option>
+          </select>
+        </div>
+      )
+    }
+
+    if (field === 'tipo' && isEditing) {
+      return (
+        <div>
+          <h3 className="text-sm font-medium text-gray-500">{label}</h3>
+          <select
+            value={solicitacao[field] as string}
+            onChange={(e) => onUpdate(field, e.target.value)}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+          >
+            <option value="desenvolvimento">Desenvolvimento</option>
+            <option value="dados">Dados</option>
+            <option value="suporte">Suporte</option>
+            <option value="infraestrutura">Infraestrutura</option>
+            <option value="outros">Outros</option>
           </select>
         </div>
       )
@@ -68,7 +99,9 @@ export function InfoSolicitacao({ solicitacao, isEditing, onUpdate }: InfoSolici
               ? formatStatus(solicitacao[field] as string)
               : field === 'prazo'
                 ? formatDate(solicitacao[field] as string)
-                : solicitacao[field] as string}
+                : field === 'tipo'
+                  ? formatTipo(solicitacao[field] as string)
+                  : solicitacao[field] as string}
           </p>
         )}
       </div>

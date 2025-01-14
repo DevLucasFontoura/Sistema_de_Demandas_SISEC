@@ -7,7 +7,7 @@ import { SelectResponsavel } from '../components/SelectResponsavel'
 
 const firestore = getFirestore()
 
-type TipoDemanda = 'desenvolvimento' | 'dados'
+type TipoDemanda = 'desenvolvimento' | 'dados' | 'suporte' | 'infraestrutura' | 'outros'
 type Urgencia = 'baixa' | 'media' | 'alta'
 
 interface FormData {
@@ -120,6 +120,9 @@ function NovaSolicitacao() {
                   >
                     <option value="desenvolvimento">Desenvolvimento</option>
                     <option value="dados">Dados</option>
+                    <option value="suporte">Suporte</option>
+                    <option value="infraestrutura">Infraestrutura</option>
+                    <option value="outros">Outros</option>
                   </select>
                 </div>
 

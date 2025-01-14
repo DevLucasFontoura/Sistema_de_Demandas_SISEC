@@ -277,6 +277,9 @@ export function DetalhesSolicitacao({
                 >
                   <option value="desenvolvimento">Desenvolvimento</option>
                   <option value="dados">Dados</option>
+                  <option value="suporte">Suporte</option>
+                  <option value="infraestrutura">Infraestrutura</option>
+                  <option value="outros">Outros</option>
                 </select>
               ) : (
                 <p className="mt-1 text-gray-800">{solicitacao.tipo}</p>

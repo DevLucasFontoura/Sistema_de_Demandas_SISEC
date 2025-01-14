@@ -26,14 +26,16 @@ const firestore = getFirestore()
 
 interface Solicitacao {
   id: string
-  solicitante: string
-  tipo: 'desenvolvimento' | 'dados' | 'suporte_tecnico' | 'infraestrutura_ti' | 'outros'
-  urgencia: string
-  status: string
-  prazo: string
-  descricao: string
   titulo: string
-  responsavel?: string
+  descricao: string
+  solicitante: string
+  tipo: 'desenvolvimento' | 'dados' | 'suporte' | 'infraestrutura' | 'outros'
+  urgencia: 'baixa' | 'media' | 'alta'
+  status: 'pendente' | 'em_andamento' | 'concluida' | 'suspenso'
+  prazo: string
+  responsavel: string
+  comentarios?: Comentario[]
+  adiamentos?: Adiamento[]
 }
 
 function DetalhesDaSolicitacaoPage() {
@@ -463,6 +465,23 @@ function DetalhesDaSolicitacaoPage() {
     }
   };
 
+  const formatarTipo = (tipo: string) => {
+    switch (tipo) {
+      case 'desenvolvimento':
+        return 'Desenvolvimento';
+      case 'dados':
+        return 'Dados';
+      case 'suporte':
+        return 'Suporte';
+      case 'infraestrutura':
+        return 'Infraestrutura';
+      case 'outros':
+        return 'Outros';
+      default:
+        return 'Desconhecido';
+    }
+  };
+
   return (
     <div className="p-8">
       {/* Header */}
@@ -675,10 +694,13 @@ function DetalhesDaSolicitacaoPage() {
                       >
                         <option value="desenvolvimento">Desenvolvimento</option>
                         <option value="dados">Dados</option>
+                        <option value="suporte">Suporte</option>
+                        <option value="infraestrutura">Infraestrutura</option>
+                        <option value="outros">Outros</option>
                       </select>
                     ) : (
                       <p className="text-gray-700 font-medium">
-                        {solicitacao.tipo === 'desenvolvimento' ? 'Desenvolvimento' : 'Dados'}
+                        {formatarTipo(solicitacao.tipo)}
                       </p>
                     )}
                   </div>

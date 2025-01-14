@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
 import '../utils/Login.css'
 import { ClipboardDocumentListIcon, ChartBarIcon, UserGroupIcon } from '@heroicons/react/24/outline'
+import Particles from "react-particles"
+import type { Container, Engine } from "tsparticles-engine"
+import { loadSlim } from "tsparticles-slim"
 
 function Login() {
   const navigate = useNavigate()
@@ -35,8 +38,80 @@ function Login() {
     }
   }
 
+  const particlesInit = useCallback(async (engine: Engine) => {
+    await loadSlim(engine)
+  }, [])
+
+  const particlesConfig = {
+    particles: {
+      number: {
+        value: 50,
+        density: {
+          enable: true,
+          value_area: 1000
+        }
+      },
+      color: {
+        value: "#ffffff"
+      },
+      links: {
+        enable: true,
+        distance: 200,
+        color: "#ffffff",
+        opacity: 0.15,
+        width: 1
+      },
+      move: {
+        enable: true,
+        speed: 0.8,
+        direction: "none",
+        random: false,
+        straight: false,
+        outModes: {
+          default: "bounce"
+        },
+      }
+    },
+    interactivity: {
+      events: {
+        onHover: {
+          enable: true,
+          mode: "grab"
+        },
+        onClick: {
+          enable: true,
+          mode: "push"
+        }
+      },
+      modes: {
+        grab: {
+          distance: 180,
+          links: {
+            opacity: 0.3
+          }
+        }
+      }
+    },
+    background: {
+      color: "transparent"
+    },
+    fullScreen: {
+      enable: false,
+      zIndex: 0
+    },
+    detectRetina: true
+  }
+
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-blue-600 to-cyan-500">
+      {/* Particles background */}
+      <Particles
+        id="tsparticles"
+        init={particlesInit}
+        options={particlesConfig}
+        className="absolute inset-0"
+      />
+
       {/* Elementos decorativos de fundo */}
       <div className="absolute inset-0">
         <div className="absolute -top-[40%] -left-[20%] w-[70%] h-[70%] rounded-full bg-blue-400 opacity-20 blur-3xl"></div>

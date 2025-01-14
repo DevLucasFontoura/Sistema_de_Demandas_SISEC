@@ -10,6 +10,7 @@ import { TrashIcon } from '@heroicons/react/24/outline'
 import { Dialog, Transition } from '@headlessui/react'
 import { Fragment } from 'react'
 import { db } from '../services/firebaseConfig'
+import { SelectResponsavel } from '../components/SelectResponsavel'
 
 interface Comentario {
   id: string
@@ -713,11 +714,9 @@ function DetalhesDaSolicitacaoPage() {
                   <div>
                     <p className="text-sm text-gray-500">Responsável</p>
                     {isEditing ? (
-                      <input
-                        type="text"
+                      <SelectResponsavel
                         value={editForm.responsavel}
-                        onChange={(e) => setEditForm(prev => ({ ...prev, responsavel: e.target.value }))}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        onChange={(value) => setEditForm(prev => ({ ...prev, responsavel: value }))}
                       />
                     ) : (
                       <p className="text-gray-700 font-medium">{solicitacao.responsavel || 'Não atribuído'}</p>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
 import { getFirestore, doc, setDoc, updateDoc, arrayUnion, getDoc, serverTimestamp } from 'firebase/firestore'
+import { SelectResponsavel } from '../components/SelectResponsavel'
 
 const firestore = getFirestore()
 
@@ -16,6 +17,7 @@ interface FormData {
   prazo: string
   solicitante: string
   descricao: string
+  responsavel: string
 }
 
 function generateRandomId(): string {
@@ -32,6 +34,7 @@ function NovaSolicitacao() {
     prazo: new Date().toISOString().split('T')[0],
     solicitante: '',
     descricao: '',
+    responsavel: '',
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -47,6 +50,7 @@ function NovaSolicitacao() {
       status: 'pendente',
       tipo: formData.tipo,
       urgencia: formData.urgencia,
+      responsavel: formData.responsavel,
       createdAt: serverTimestamp(),
       userId: user?.uid
     }
@@ -178,6 +182,18 @@ function NovaSolicitacao() {
                   value={formData.descricao}
                   onChange={(e) => setFormData(prev => ({ ...prev, descricao: e.target.value }))}
                   placeholder="Descreva detalhadamente a sua solicitação"
+                />
+              </div>
+
+              {/* Responsável */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Responsável
+                </label>
+                <SelectResponsavel
+                  value={formData.responsavel}
+                  onChange={(value) => setFormData(prev => ({ ...prev, responsavel: value }))}
+                  className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200"
                 />
               </div>
 

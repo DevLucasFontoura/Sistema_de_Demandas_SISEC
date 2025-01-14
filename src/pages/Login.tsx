@@ -14,7 +14,7 @@ function Login() {
 
   useEffect(() => {
     if (user && !loading) {
-      navigate('/lista-solicitacoes')
+      navigate('/painel-demandas')
     }
   }, [user, loading, navigate])
 

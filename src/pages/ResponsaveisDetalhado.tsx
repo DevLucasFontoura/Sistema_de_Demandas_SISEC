@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { getFirestore, collection, getDocs } from 'firebase/firestore'
-import { UserGroupIcon, ArrowLeftIcon, ChevronDownIcon } from '@heroicons/react/24/outline'
+import { UserGroupIcon, ArrowLeftIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
@@ -20,6 +20,8 @@ function ResponsaveisDetalhado() {
   const navigate = useNavigate()
   const [responsaveisData, setResponsaveisData] = useState<ResponsavelDetalhado[]>([])
   const [expandedResponsaveis, setExpandedResponsaveis] = useState<Set<string>>(new Set())
+  const [currentPages, setCurrentPages] = useState<{ [key: string]: number }>({})
+  const itemsPerPage = 6
 
   useEffect(() => {
     const fetchData = async () => {
@@ -157,6 +159,13 @@ function ResponsaveisDetalhado() {
     }
   }
 
+  const handlePageChange = (responsavel: string, page: number) => {
+    setCurrentPages(prev => ({
+      ...prev,
+      [responsavel]: page
+    }))
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
@@ -180,83 +189,133 @@ function ResponsaveisDetalhado() {
           initial="hidden"
           animate="visible"
         >
-          {responsaveisData.map((responsavel) => (
-            <motion.div
-              key={responsavel.responsavel}
-              variants={itemVariants}
-              className="bg-white rounded-lg shadow"
-            >
-              <button
-                onClick={() => toggleResponsavel(responsavel.responsavel)}
-                className="w-full p-4 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <UserGroupIcon className="w-6 h-6 text-blue-500" />
-                  <span className="text-xl font-semibold text-gray-900">
-                    {responsavel.responsavel}
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    ({responsavel.demandas.length} demandas)
-                  </span>
-                </div>
-                <ChevronDownIcon 
-                  className={`w-5 h-5 text-gray-500 transition-transform ${
-                    expandedResponsaveis.has(responsavel.responsavel) ? 'transform rotate-180' : ''
-                  }`}
-                />
-              </button>
+          {responsaveisData.map((responsavel) => {
+            const currentPage = currentPages[responsavel.responsavel] || 1
+            const totalPages = Math.ceil(responsavel.demandas.length / itemsPerPage)
+            const startIndex = (currentPage - 1) * itemsPerPage
+            const endIndex = startIndex + itemsPerPage
+            const currentDemandas = responsavel.demandas.slice(startIndex, endIndex)
 
-              <div className={`overflow-hidden transition-all ${
-                expandedResponsaveis.has(responsavel.responsavel) ? 'max-h-[2000px]' : 'max-h-0'
-              }`}>
-                <div className="p-4 border-t border-gray-100">
-                  <table className="min-w-full">
-                    <thead>
-                      <tr className="border-b border-gray-200">
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Número</th>
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Título</th>
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Status</th>
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Prazo</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {responsavel.demandas.map((demanda) => (
-                        <motion.tr
-                          key={demanda.id}
-                          initial={{ opacity: 0, x: 50 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ 
-                            type: "spring",
-                            stiffness: 50,
-                            damping: 15,
-                            duration: 0.6,
-                            delay: 0.2
-                          }}
-                          className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
-                          onClick={() => navigate(`/detalhes-solicitacao/${demanda.id}`)}
+            return (
+              <motion.div
+                key={responsavel.responsavel}
+                variants={itemVariants}
+                className="bg-white rounded-lg shadow"
+              >
+                <button
+                  onClick={() => toggleResponsavel(responsavel.responsavel)}
+                  className="w-full p-4 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <UserGroupIcon className="w-6 h-6 text-blue-500" />
+                    <span className="text-xl font-semibold text-gray-900">
+                      {responsavel.responsavel}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      ({responsavel.demandas.length} demandas)
+                    </span>
+                  </div>
+                  <ChevronDownIcon 
+                    className={`w-5 h-5 text-gray-500 transition-transform ${
+                      expandedResponsaveis.has(responsavel.responsavel) ? 'transform rotate-180' : ''
+                    }`}
+                  />
+                </button>
+
+                <div className={`overflow-hidden transition-all ${
+                  expandedResponsaveis.has(responsavel.responsavel) ? 'max-h-[2000px]' : 'max-h-0'
+                }`}>
+                  <div className="p-4 border-t border-gray-100">
+                    <table className="min-w-full">
+                      <thead>
+                        <tr className="border-b border-gray-200">
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Número</th>
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Título</th>
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Status</th>
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Prazo</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {currentDemandas.map((demanda) => (
+                          <motion.tr
+                            key={demanda.id}
+                            initial={{ opacity: 0, x: 50 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ 
+                              type: "spring",
+                              stiffness: 50,
+                              damping: 15,
+                              duration: 0.6,
+                              delay: 0.2
+                            }}
+                            className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
+                            onClick={() => navigate(`/detalhes-solicitacao/${demanda.id}`)}
+                          >
+                            <td className="px-4 py-3 text-sm text-gray-900">
+                              #{demanda.id}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-900 font-medium">
+                              {demanda.titulo}
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusBadgeClass(demanda.status)}`}>
+                                {formatStatus(demanda.status)}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-500">
+                              {formatarPrazo(demanda.prazo)}
+                            </td>
+                          </motion.tr>
+                        ))}
+                      </tbody>
+                    </table>
+
+                    {totalPages > 1 && (
+                      <div className="mt-4 flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => handlePageChange(responsavel.responsavel, currentPage - 1)}
+                          disabled={currentPage === 1}
+                          className={`p-2 rounded-full ${
+                            currentPage === 1 
+                              ? 'text-gray-400 cursor-not-allowed' 
+                              : 'text-gray-600 hover:bg-gray-100'
+                          }`}
                         >
-                          <td className="px-4 py-3 text-sm text-gray-900">
-                            #{demanda.id}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-gray-900 font-medium">
-                            {demanda.titulo}
-                          </td>
-                          <td className="px-4 py-3">
-                            <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusBadgeClass(demanda.status)}`}>
-                              {formatStatus(demanda.status)}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 text-sm text-gray-500">
-                            {formatarPrazo(demanda.prazo)}
-                          </td>
-                        </motion.tr>
-                      ))}
-                    </tbody>
-                  </table>
+                          <ChevronLeftIcon className="w-5 h-5" />
+                        </button>
+                        
+                        {[...Array(totalPages)].map((_, index) => (
+                          <button
+                            key={index + 1}
+                            onClick={() => handlePageChange(responsavel.responsavel, index + 1)}
+                            className={`px-3 py-1 rounded-md ${
+                              currentPage === index + 1
+                                ? 'bg-blue-600 text-white'
+                                : 'text-gray-600 hover:bg-gray-100'
+                            }`}
+                          >
+                            {index + 1}
+                          </button>
+                        ))}
+
+                        <button
+                          onClick={() => handlePageChange(responsavel.responsavel, currentPage + 1)}
+                          disabled={currentPage === totalPages}
+                          className={`p-2 rounded-full ${
+                            currentPage === totalPages 
+                              ? 'text-gray-400 cursor-not-allowed' 
+                              : 'text-gray-600 hover:bg-gray-100'
+                          }`}
+                        >
+                          <ChevronRightIcon className="w-5 h-5" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            )
+          })}
         </motion.div>
       </div>
     </div>

@@ -356,24 +356,67 @@ function DetalhesDaSolicitacaoPage() {
     });
   };
 
+  const calcularTempoSuspensao = (dataSuspensao: any) => {
+    if (!dataSuspensao) return null;
+
+    try {
+      const suspensaoDate = dataSuspensao instanceof Date 
+        ? dataSuspensao 
+        : new Date(dataSuspensao.seconds * 1000);
+      
+      const agora = new Date();
+      const diffMillis = agora.getTime() - suspensaoDate.getTime();
+      
+      const minutos = Math.floor(diffMillis / (1000 * 60));
+      const horas = Math.floor(minutos / 60);
+      const dias = Math.floor(horas / 24);
+      const semanas = Math.floor(dias / 7);
+      
+      if (semanas > 0) {
+        return `${semanas} semana${semanas > 1 ? 's' : ''} e ${dias % 7} dia${dias % 7 !== 1 ? 's' : ''}`;
+      }
+      if (dias > 0) {
+        return `${dias} dia${dias > 1 ? 's' : ''} e ${horas % 24} hora${horas % 24 !== 1 ? 's' : ''}`;
+      }
+      if (horas > 0) {
+        return `${horas} hora${horas > 1 ? 's' : ''} e ${minutos % 60} minuto${minutos % 60 !== 1 ? 's' : ''}`;
+      }
+      return `${minutos} minuto${minutos > 1 ? 's' : ''}`;
+    } catch (error) {
+      console.error('Erro ao calcular tempo de suspensão:', error);
+      return 'Tempo indisponível';
+    }
+  };
+
   const handleSave = async () => {
     if (!solicitacao?.id) return;
 
     try {
       const solicitacaoRef = doc(db, 'demandas', solicitacao.id);
-      await updateDoc(solicitacaoRef, {
+      const updateData: any = {
         solicitante: editForm.solicitante,
         tipo: editForm.tipo,
         responsavel: editForm.responsavel,
         urgencia: editForm.urgencia,
         descricao: editForm.descricao,
-        status: editForm.status
-      });
+        status: editForm.status,
+      };
+
+      // Se o status mudou para suspenso, adiciona a data de suspensão
+      if (editForm.status === 'suspenso' && solicitacao.status !== 'suspenso') {
+        updateData.dataSuspensao = Timestamp.now();
+      }
+      // Se o status mudou de suspenso para outro, remove a data de suspensão
+      else if (editForm.status !== 'suspenso' && solicitacao.status === 'suspenso') {
+        updateData.dataSuspensao = deleteField();
+      }
+
+      await updateDoc(solicitacaoRef, updateData);
 
       // Atualiza o estado local
       setSolicitacao({
         ...solicitacao,
-        ...editForm
+        ...updateData
       });
 
       setIsEditing(false);
@@ -488,6 +531,18 @@ function DetalhesDaSolicitacaoPage() {
     }
     return titulo
   }
+
+  // Adicione este useEffect para atualizar o tempo de suspensão a cada minuto
+  useEffect(() => {
+    if (solicitacao?.status === 'suspenso' && solicitacao?.dataSuspensao) {
+      const interval = setInterval(() => {
+        // Força uma re-renderização para atualizar o tempo
+        setSolicitacao(prev => ({ ...prev }));
+      }, 60000); // Atualiza a cada minuto
+
+      return () => clearInterval(interval);
+    }
+  }, [solicitacao?.status, solicitacao?.dataSuspensao]);
 
   return (
     <div className="p-8">
@@ -754,6 +809,16 @@ function DetalhesDaSolicitacaoPage() {
                       <p className="text-gray-700 font-medium">{solicitacao.solicitante || 'Não definido'}</p>
                     )}
                   </div>
+                  {solicitacao.status === 'suspenso' && solicitacao.dataSuspensao && (
+                    <div>
+                      <p className="text-sm text-gray-500">Tempo em Suspensão</p>
+                      <div className="mt-1">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                          {calcularTempoSuspensao(solicitacao.dataSuspensao)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

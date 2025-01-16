@@ -4,7 +4,9 @@ import {
   ClockIcon, 
   CheckCircleIcon,
   MagnifyingGlassIcon,
-  TrashIcon
+  TrashIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon
 } from '@heroicons/react/24/outline'
 import { getFirestore, collection, getDocs, deleteDoc, doc } from 'firebase/firestore'
 import { useAuth } from '../context/AuthContext'
@@ -106,6 +108,13 @@ function ListaSolicitacoes() {
   const [searchTerm, setSearchTerm] = useState('')
   const [solicitacoes, setSolicitacoes] = useState<Demanda[]>([])
   const [filteredSolicitacoes, setFilteredSolicitacoes] = useState<Demanda[]>([])
+  const [currentPage, setCurrentPage] = useState<{ [key: string]: number }>({
+    pendente: 1,
+    em_andamento: 1,
+    concluida: 1,
+    suspenso: 1
+  })
+  const itemsPerPage = 10
 
   useEffect(() => {
     const fetchSolicitacoes = async () => {
@@ -234,10 +243,23 @@ function ListaSolicitacoes() {
     }
   }
 
+  const handlePageChange = (status: string, page: number) => {
+    setCurrentPage(prev => ({
+      ...prev,
+      [status]: page
+    }))
+  }
+
   const renderStatusSection = (status: string, title: string) => {
-    const filteredByStatus = filteredSolicitacoes.filter(s => s.status === status);
+    const filteredByStatus = filteredSolicitacoes.filter(s => s.status === status)
     
-    if (filteredByStatus.length === 0) return null;
+    if (filteredByStatus.length === 0) return null
+
+    const totalPages = Math.ceil(filteredByStatus.length / itemsPerPage)
+    const currentPageNumber = currentPage[status] || 1
+    const startIndex = (currentPageNumber - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const currentItems = filteredByStatus.slice(startIndex, endIndex)
 
     return (
       <div className="mb-8">
@@ -274,7 +296,7 @@ function ListaSolicitacoes() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredByStatus.map((solicitacao) => (
+                {currentItems.map((solicitacao) => (
                   <tr 
                     key={solicitacao.id} 
                     className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 transition-colors duration-150"
@@ -324,10 +346,57 @@ function ListaSolicitacoes() {
               </tbody>
             </table>
           </div>
+
+          {/* Paginação */}
+          {totalPages > 1 && (
+            <div className="px-6 py-4 flex items-center justify-center gap-2 border-t border-gray-200">
+              <button
+                onClick={() => handlePageChange(status, currentPageNumber - 1)}
+                disabled={currentPageNumber === 1}
+                className={`p-2 rounded-full ${
+                  currentPageNumber === 1 
+                    ? 'text-gray-400 cursor-not-allowed' 
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <ChevronLeftIcon className="w-5 h-5" />
+              </button>
+              
+              {[...Array(totalPages)].map((_, index) => (
+                <button
+                  key={index + 1}
+                  onClick={() => handlePageChange(status, index + 1)}
+                  className={`px-3 py-1 rounded-md ${
+                    currentPageNumber === index + 1
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  {index + 1}
+                </button>
+              ))}
+
+              <button
+                onClick={() => handlePageChange(status, currentPageNumber + 1)}
+                disabled={currentPageNumber === totalPages}
+                className={`p-2 rounded-full ${
+                  currentPageNumber === totalPages 
+                    ? 'text-gray-400 cursor-not-allowed' 
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <ChevronRightIcon className="w-5 h-5" />
+              </button>
+
+              <span className="ml-4 text-sm text-gray-500">
+                Mostrando {startIndex + 1}-{Math.min(endIndex, filteredByStatus.length)} de {filteredByStatus.length}
+              </span>
+            </div>
+          )}
         </div>
       </div>
-    );
-  };
+    )
+  }
 
   return (
     <div className="p-8">

@@ -60,6 +60,15 @@ function DetalhesDaSolicitacaoPage() {
     status: '',
     titulo: ''
   });
+  const [originalForm, setOriginalForm] = useState({
+    solicitante: '',
+    tipo: '',
+    responsavel: '',
+    urgencia: '',
+    descricao: '',
+    status: '',
+    titulo: ''
+  });
 
   // Ajustando a verificação para "Equipe de TI"
   const isEquipeTI = userProfile?.perfil === "Equipe de TI";
@@ -334,7 +343,7 @@ function DetalhesDaSolicitacaoPage() {
   }, [id]);
 
   const handleEdit = () => {
-    setEditForm({
+    const originalValues = {
       solicitante: solicitacao.solicitante,
       tipo: solicitacao.tipo,
       responsavel: solicitacao.responsavel || '',
@@ -342,21 +351,16 @@ function DetalhesDaSolicitacaoPage() {
       descricao: solicitacao.descricao,
       status: solicitacao.status,
       titulo: solicitacao.titulo
-    });
+    };
+    
+    setOriginalForm(originalValues);
+    setEditForm(originalValues);
     setIsEditing(true);
   };
 
   const handleCancel = () => {
+    setEditForm(originalForm); // Restaura os valores originais
     setIsEditing(false);
-    setEditForm({
-      solicitante: '',
-      tipo: '',
-      responsavel: '',
-      urgencia: '',
-      descricao: '',
-      status: '',
-      titulo: ''
-    });
   };
 
   const calcularTempoSuspensao = (dataSuspensao: any) => {
@@ -601,29 +605,45 @@ function DetalhesDaSolicitacaoPage() {
                 )}
                 {solicitacao?.status !== 'concluida' && isAdminOrTI && (
                   <>
-                    <button
-                      onClick={isEditing ? handleSave : handleEdit}
-                      className="px-4 py-2 text-white bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg transition-all duration-200 hover:from-blue-600 hover:to-cyan-600 font-medium"
-                    >
-                      {isEditing ? 'Salvar' : 'Editar'}
-                    </button>
-                    
-                    {!isEditing && (
-                      <>
-                        <button
-                          onClick={() => setIsAdiamentoModalOpen(true)}
-                          className="px-4 py-2 text-white bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg transition-all duration-200 hover:from-yellow-500 hover:to-orange-600 font-medium"
-                        >
-                          Solicitar Adiamento
-                        </button>
-                        <button
-                          onClick={handleComplete}
-                          className="px-4 py-2 text-white bg-gradient-to-r from-blue-400 to-cyan-500 rounded-lg transition-all duration-200 hover:from-blue-500 hover:to-cyan-600 font-medium"
-                        >
-                          Marcar como Concluído
-                        </button>
-                      </>
-                    )}
+                    <div className="flex space-x-3 shrink-0">
+                      {isEditing ? (
+                        <>
+                          <button
+                            onClick={handleSave}
+                            className="px-4 py-2 text-white bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg transition-all duration-200 hover:from-blue-600 hover:to-cyan-600 font-medium"
+                          >
+                            Salvar
+                          </button>
+                          <button
+                            onClick={handleCancel}
+                            className="px-4 py-2 text-white bg-gradient-to-r from-red-500 to-red-600 rounded-lg transition-all duration-200 hover:from-red-600 hover:to-red-700 font-medium"
+                          >
+                            Cancelar
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={handleEdit}
+                            className="px-4 py-2 text-white bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg transition-all duration-200 hover:from-blue-600 hover:to-cyan-600 font-medium"
+                          >
+                            Editar
+                          </button>
+                          <button
+                            onClick={() => setIsAdiamentoModalOpen(true)}
+                            className="px-4 py-2 text-white bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg transition-all duration-200 hover:from-yellow-500 hover:to-orange-600 font-medium"
+                          >
+                            Solicitar Adiamento
+                          </button>
+                          <button
+                            onClick={handleComplete}
+                            className="px-4 py-2 text-white bg-gradient-to-r from-blue-400 to-cyan-500 rounded-lg transition-all duration-200 hover:from-blue-500 hover:to-cyan-600 font-medium"
+                          >
+                            Marcar como Concluído
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </>
                 )}
               </div>

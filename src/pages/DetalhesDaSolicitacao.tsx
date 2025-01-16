@@ -57,7 +57,8 @@ function DetalhesDaSolicitacaoPage() {
     responsavel: '',
     urgencia: '',
     descricao: '',
-    status: ''
+    status: '',
+    titulo: ''
   });
 
   // Ajustando a verificação para "Equipe de TI"
@@ -339,7 +340,8 @@ function DetalhesDaSolicitacaoPage() {
       responsavel: solicitacao.responsavel || '',
       urgencia: solicitacao.urgencia,
       descricao: solicitacao.descricao,
-      status: solicitacao.status
+      status: solicitacao.status,
+      titulo: solicitacao.titulo
     });
     setIsEditing(true);
   };
@@ -352,7 +354,8 @@ function DetalhesDaSolicitacaoPage() {
       responsavel: '',
       urgencia: '',
       descricao: '',
-      status: ''
+      status: '',
+      titulo: ''
     });
   };
 
@@ -400,6 +403,7 @@ function DetalhesDaSolicitacaoPage() {
         urgencia: editForm.urgencia,
         descricao: editForm.descricao,
         status: editForm.status,
+        titulo: editForm.titulo
       };
 
       // Se o status mudou para suspenso, adiciona a data de suspensão
@@ -571,9 +575,19 @@ function DetalhesDaSolicitacaoPage() {
           <div className="p-6 border-b border-gray-200">
             <div className="flex justify-between items-start">
               <div className="max-w-2xl">
-                <h2 className="text-xl font-semibold text-gray-900 mb-3 whitespace-pre-wrap break-words">
-                  {solicitacao.titulo}
-                </h2>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={editForm.titulo}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, titulo: e.target.value }))}
+                    className="w-full text-xl font-semibold text-gray-900 mb-3 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Título da solicitação"
+                  />
+                ) : (
+                  <h2 className="text-xl font-semibold text-gray-900 mb-3 whitespace-pre-wrap break-words">
+                    {solicitacao.titulo}
+                  </h2>
+                )}
               </div>
               
               <div className="flex space-x-3 shrink-0">

@@ -85,8 +85,8 @@ function Dashboard() {
     return data.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' })
   }
 
-  // Função auxiliar para obter os últimos 6 meses
-  const getUltimosSeisMeses = () => {
+  // Função auxiliar para obter os últimos 3 meses
+  const getUltimosTresMeses = () => {
     const meses = new Map()
     const hoje = new Date()
     
@@ -94,13 +94,13 @@ function Dashboard() {
     hoje.setDate(1)
     hoje.setHours(0, 0, 0, 0)
 
-    // Gera os últimos 6 meses
-    for (let i = 5; i >= 0; i--) {
-      const data = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1)
+    // Gera os últimos 3 meses, começando do mais antigo
+    for (let i = 0; i <= 2; i++) { // Mudamos a direção do loop (de 0 a 2)
+      const data = new Date(hoje.getFullYear(), hoje.getMonth() - (2 - i), 1) // Invertemos o cálculo do mês
       const mesAno = formatarMesAno(data)
       meses.set(mesAno, {
         mes: mesAno,
-        data: data, // Guardamos a data para ordenação
+        data: data,
         total: 0,
         pendentes: 0,
         emAndamento: 0,
@@ -121,7 +121,7 @@ function Dashboard() {
       const demandas = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
-        dataCriacao: doc.data().dataCriacao?.toDate() || new Date()
+        dataCriacao: doc.data().createdAt?.toDate() || new Date()
       }))
 
       // Calcula estatísticas gerais
@@ -171,26 +171,26 @@ function Dashboard() {
       setEstatisticas(stats)
       setDemandasPorResponsavel(Object.values(porResponsavel))
 
-      // Inicializa os últimos 6 meses
-      const ultimosSeisMeses = getUltimosSeisMeses()
+      // Inicializa os últimos 3 meses
+      const ultimosTresMeses = getUltimosTresMeses()
       
-      // Data limite (6 meses atrás)
+      // Data limite (3 meses atrás)
       const dataLimite = new Date()
-      dataLimite.setMonth(dataLimite.getMonth() - 5)
+      dataLimite.setMonth(dataLimite.getMonth() - 2)
       dataLimite.setDate(1)
       dataLimite.setHours(0, 0, 0, 0)
 
       // Processa cada demanda
       demandas.forEach(demanda => {
-        const dataDemanda = new Date(demanda.dataCriacao)
+        const dataDemanda = demanda.createdAt?.toDate() || new Date(demanda.createdAt)
         dataDemanda.setDate(1) // Normaliza para o primeiro dia do mês
         
-        // Só processa demandas dos últimos 6 meses
+        // Só processa demandas dos últimos 3 meses
         if (dataDemanda >= dataLimite) {
           const mesAno = formatarMesAno(dataDemanda)
           
-          if (ultimosSeisMeses.has(mesAno)) {
-            const stats = ultimosSeisMeses.get(mesAno)
+          if (ultimosTresMeses.has(mesAno)) {
+            const stats = ultimosTresMeses.get(mesAno)
             stats.total++
             
             switch(demanda.status) {
@@ -211,10 +211,10 @@ function Dashboard() {
         }
       })
 
-      // Converte o Map para array e ordena por data
-      const demandasPorMesArray = Array.from(ultimosSeisMeses.values())
-        .sort((a, b) => a.data.getTime() - b.data.getTime())
-        .map(({ data, ...rest }) => rest) // Remove o campo data antes de enviar
+      // Converte o Map para array e ordena por data (do mais antigo para o mais recente)
+      const demandasPorMesArray = Array.from(ultimosTresMeses.values())
+        .sort((a, b) => a.data.getTime() - b.data.getTime()) // Mantém esta ordenação
+        .map(({ data, ...rest }) => rest)
 
       console.log('Dados processados:', demandasPorMesArray)
       setDemandasPorMes(demandasPorMesArray)

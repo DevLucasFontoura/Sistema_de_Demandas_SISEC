@@ -1,12 +1,12 @@
-import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
-import toast from 'react-hot-toast'
-import { useAuth } from '../context/AuthContext'
-import '../utils/Login.css'
 import { ClipboardDocumentListIcon, ChartBarIcon, UserGroupIcon } from '@heroicons/react/24/outline'
-import Particles from "react-particles"
-import type { Container, Engine } from "tsparticles-engine"
+import { useState, useEffect, useCallback } from 'react'
+import { useAuth } from '../context/AuthContext'
+import type { Engine } from "tsparticles-engine"
+import { useNavigate } from 'react-router-dom'
 import { loadSlim } from "tsparticles-slim"
+import Particles from "react-particles"
+import toast from 'react-hot-toast'
+import '../utils/Login.css'
 
 function Login() {
   const navigate = useNavigate()
@@ -17,7 +17,7 @@ function Login() {
 
   useEffect(() => {
     if (user && !loading) {
-      navigate('/painel-demandas')
+      navigate('/dashboard')
     }
   }, [user, loading, navigate])
 

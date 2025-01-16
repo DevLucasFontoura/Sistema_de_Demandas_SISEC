@@ -10,6 +10,7 @@ import CadastrarUsuario from './pages/CadastrarUsuario'
 import ListaUsuarios from './pages/ListaUsuarios'
 import PainelDemandas from './pages/PainelDemandas'
 import ProtectedRoute from './components/ProtectedRoute'
+import ResponsaveisDetalhado from './pages/ResponsaveisDetalhado'
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
                     <Route path="cadastrar-usuario" element={<CadastrarUsuario />} />
                     <Route path="lista-usuarios" element={<ListaUsuarios />} />
                     <Route path="/" element={<Navigate to="/dashboard" />} />
+                    <Route path="responsaveis-detalhado" element={<ResponsaveisDetalhado />} />
                   </Routes>
                 </AppLayout>
               </ProtectedRoute>

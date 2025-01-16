@@ -23,6 +23,7 @@ import {
   Cell,
   Legend
 } from 'recharts'
+import { Link } from 'react-router-dom'
 
 interface DemandaPorResponsavel {
   responsavel: string
@@ -307,11 +308,19 @@ function Dashboard() {
 
         {/* Estatísticas por Responsável */}
         <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200 mb-8">
-          <div className="flex items-center gap-2 mb-6">
-            <UserGroupIcon className="w-6 h-6 text-blue-500" />
-            <h2 className="text-lg font-semibold text-gray-900">
-              Demandas por Responsável
-            </h2>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <UserGroupIcon className="w-6 h-6 text-blue-500" />
+              <h2 className="text-lg font-semibold text-gray-900">
+                Demandas por Responsável
+              </h2>
+            </div>
+            <Link
+              to="/responsaveis-detalhado"
+              className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Visão Detalhada
+            </Link>
           </div>
           
           <div className="overflow-x-auto">

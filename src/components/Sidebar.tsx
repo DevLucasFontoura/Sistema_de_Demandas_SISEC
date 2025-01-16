@@ -9,9 +9,9 @@ function Sidebar() {
   const isAdmin = user?.role === 'adm' || user?.role === 'equipe_ti'
 
   const baseMenuItems = [
-    { path: '/painel-demandas', icon: ViewColumnsIcon, label: 'Painel de Demandas' },
-    { path: '/lista-solicitacoes', icon: ClipboardDocumentListIcon, label: 'Solicitações' },
     { path: '/dashboard', icon: ChartBarIcon, label: 'Dashboard' },
+    { path: '/painel-demandas', icon: ViewColumnsIcon, label: 'Por Responsável' },
+    { path: '/lista-solicitacoes', icon: ClipboardDocumentListIcon, label: 'Solicitações' },
   ]
   
   const adminMenuItems = [

@@ -495,7 +495,7 @@ function DetalhesDaSolicitacaoPage() {
           </p>
         </div>
         <button
-          onClick={() => navigate('/lista-solicitacoes')}
+          onClick={() => navigate('/responsaveis-detalhado')}
           className="flex items-center px-4 py-2 rounded-lg text-white bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 transition-all duration-200"
         >
           <ChevronLeftIcon className="w-5 h-5 mr-2" />

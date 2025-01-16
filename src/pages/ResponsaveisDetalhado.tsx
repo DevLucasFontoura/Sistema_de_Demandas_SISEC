@@ -118,13 +118,14 @@ function ResponsaveisDetalhado() {
         data = new Date(prazo)
       }
       
+      const dia = String(data.getDate()).padStart(2, '0')
+      const mes = String(data.getMonth() + 1).padStart(2, '0')
+      const ano = data.getFullYear()
+      const dataFormatada = `${dia} / ${mes} / ${ano}`
+      
       return (
-        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-          data < new Date() 
-            ? 'bg-red-100 text-red-800' 
-            : 'bg-gray-100 text-gray-800'
-        }`}>
-          {data.toLocaleDateString()}
+        <span className="text-sm text-gray-600">
+          {dataFormatada}
         </span>
       )
     } catch (error) {
@@ -164,6 +165,11 @@ function ResponsaveisDetalhado() {
       ...prev,
       [responsavel]: page
     }))
+  }
+
+  const truncateText = (text: string, limit: number) => {
+    if (text.length <= limit) return text
+    return text.substring(0, limit) + '...'
   }
 
   return (
@@ -226,13 +232,13 @@ function ResponsaveisDetalhado() {
                   expandedResponsaveis.has(responsavel.responsavel) ? 'max-h-[2000px]' : 'max-h-0'
                 }`}>
                   <div className="p-4 border-t border-gray-100">
-                    <table className="min-w-full">
+                    <table className="min-w-full table-fixed">
                       <thead>
                         <tr className="border-b border-gray-200">
-                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Número</th>
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 w-32">Número</th>
                           <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Título</th>
-                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Status</th>
-                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Prazo</th>
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 w-32">Status</th>
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 w-32">Prazo</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -254,15 +260,15 @@ function ResponsaveisDetalhado() {
                             <td className="px-4 py-3 text-sm text-gray-900">
                               #{demanda.id}
                             </td>
-                            <td className="px-4 py-3 text-sm text-gray-900 font-medium">
-                              {demanda.titulo}
+                            <td className="px-4 py-3 text-sm text-gray-900 font-medium truncate">
+                              {truncateText(demanda.titulo, 60)}
                             </td>
-                            <td className="px-4 py-3">
+                            <td className="px-4 py-3 whitespace-nowrap">
                               <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusBadgeClass(demanda.status)}`}>
                                 {formatStatus(demanda.status)}
                               </span>
                             </td>
-                            <td className="px-4 py-3 text-sm text-gray-500">
+                            <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
                               {formatarPrazo(demanda.prazo)}
                             </td>
                           </motion.tr>

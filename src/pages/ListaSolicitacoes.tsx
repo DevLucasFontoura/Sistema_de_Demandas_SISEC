@@ -6,7 +6,8 @@ import {
   MagnifyingGlassIcon,
   TrashIcon,
   ChevronLeftIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  ChevronDownIcon
 } from '@heroicons/react/24/outline'
 import { getFirestore, collection, getDocs, deleteDoc, doc } from 'firebase/firestore'
 import { useAuth } from '../context/AuthContext'
@@ -95,7 +96,7 @@ const formatarTipo = (tipo: string) => {
     desenvolvimento: 'Desenvolvimento',
     dados: 'Dados',
     suporte: 'Suporte',
-    infraestrutura: 'Infraestrutura',
+    infraestrutura_ti: 'Infraestrutura de TI',
     outros: 'Outros'
   }
   return tiposMap[tipo as keyof typeof tiposMap] || tipo
@@ -115,6 +116,12 @@ function ListaSolicitacoes() {
     suspenso: 1
   })
   const itemsPerPage = 10
+  const [filters, setFilters] = useState<{ [key: string]: { [key: string]: string } }>({
+    pendente: { responsavel: '', solicitante: '', tipo: '', urgencia: '' },
+    em_andamento: { responsavel: '', solicitante: '', tipo: '', urgencia: '' },
+    concluida: { responsavel: '', solicitante: '', tipo: '', urgencia: '' },
+    suspenso: { responsavel: '', solicitante: '', tipo: '', urgencia: '' }
+  })
 
   useEffect(() => {
     const fetchSolicitacoes = async () => {
@@ -250,8 +257,69 @@ function ListaSolicitacoes() {
     }))
   }
 
+  // Função para obter valores únicos para cada coluna em uma lista específica
+  const getUniqueValues = (status: string, key: string) => {
+    return Array.from(new Set(
+      solicitacoes
+        .filter(item => item.status === status)
+        .map(item => item[key as keyof Demanda])
+    )).filter(Boolean).sort()
+  }
+
+  // Função para aplicar os filtros em uma lista específica
+  const applyFilters = (items: Demanda[], status: string) => {
+    return items.filter(item => {
+      return Object.entries(filters[status]).every(([key, value]) => {
+        if (!value) return true
+        return item[key as keyof Demanda] === value
+      })
+    })
+  }
+
+  // Componente FilterDropdown atualizado
+  const FilterDropdown = ({ status, column }: { status: string, column: string }) => (
+    <div className="group relative inline-flex items-center cursor-pointer">
+      <span className="text-xs font-medium text-gray-500 uppercase tracking-wider group-hover:text-gray-700">
+        {column === 'responsavel' ? 'Responsável' :
+         column === 'solicitante' ? 'Solicitante' :
+         column === 'tipo' ? 'Tipo' :
+         column === 'urgencia' ? 'Urgência' : column}
+      </span>
+      <select
+        value={filters[status][column]}
+        onChange={(e) => setFilters(prev => ({
+          ...prev,
+          [status]: { ...prev[status], [column]: e.target.value }
+        }))}
+        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+      >
+        <option value="">Todos</option>
+        {getUniqueValues(status, column).map(option => (
+          <option key={option} value={option}>
+            {column === 'tipo' ? formatarTipo(option) :
+             column === 'status' ? formatStatus(option) :
+             option}
+          </option>
+        ))}
+      </select>
+      <ChevronDownIcon className="w-4 h-4 ml-1 text-gray-400 group-hover:text-gray-600" />
+    </div>
+  )
+
   const renderStatusSection = (status: string, title: string) => {
-    const filteredByStatus = filteredSolicitacoes.filter(s => s.status === status)
+    let filteredByStatus = solicitacoes.filter(s => s.status === status)
+    
+    // Aplicar busca por texto
+    if (searchTerm) {
+      filteredByStatus = filteredByStatus.filter(s => 
+        s.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.solicitante.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (s.titulo || '').toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    }
+
+    // Aplicar filtros específicos desta lista
+    filteredByStatus = applyFilters(filteredByStatus, status)
     
     if (filteredByStatus.length === 0) return null
 
@@ -269,29 +337,29 @@ function ListaSolicitacoes() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Nº
+                  <th className="px-6 py-3 text-left">
+                    <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Nº</span>
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Solicitante
+                  <th className="px-6 py-3 text-left">
+                    <FilterDropdown status={status} column="responsavel" />
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Tipo
+                  <th className="px-6 py-3 text-left">
+                    <FilterDropdown status={status} column="solicitante" />
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Urgência
+                  <th className="px-6 py-3 text-left">
+                    <FilterDropdown status={status} column="tipo" />
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Status
+                  <th className="px-6 py-3 text-left">
+                    <FilterDropdown status={status} column="urgencia" />
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Prazo
+                  <th className="px-6 py-3 text-left">
+                    <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Status</span>
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Responsável
+                  <th className="px-6 py-3 text-left">
+                    <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Prazo</span>
                   </th>
-                  <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Ações
+                  <th className="px-6 py-3 text-center">
+                    <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</span>
                   </th>
                 </tr>
               </thead>
@@ -308,6 +376,11 @@ function ListaSolicitacoes() {
                       >
                         {solicitacao.id}
                       </Link>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-600">
+                        {solicitacao.responsavel || 'N/A'}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
@@ -327,9 +400,6 @@ function ListaSolicitacoes() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                       {solicitacao.prazo ? formatarData(solicitacao.prazo) : 'N/A'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {solicitacao.responsavel || 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       {isAdmin && (

@@ -482,6 +482,13 @@ function DetalhesDaSolicitacaoPage() {
     }
   };
 
+  const formatTitulo = (titulo: string) => {
+    if (titulo.length > 70) {
+      return titulo.substring(0, 70) + '...'
+    }
+    return titulo
+  }
+
   return (
     <div className="p-8">
       {/* Header */}
@@ -508,13 +515,13 @@ function DetalhesDaSolicitacaoPage() {
           {/* Cabeçalho da solicitação */}
           <div className="p-6 border-b border-gray-200">
             <div className="flex justify-between items-start">
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-3">
+              <div className="max-w-2xl">
+                <h2 className="text-xl font-semibold text-gray-900 mb-3 whitespace-pre-wrap break-words">
                   {solicitacao.titulo}
                 </h2>
               </div>
               
-              <div className="flex space-x-3">
+              <div className="flex space-x-3 shrink-0">
                 {solicitacao?.status === 'concluida' && isAdminOrTI && (
                   <button
                     onClick={handleReopen}

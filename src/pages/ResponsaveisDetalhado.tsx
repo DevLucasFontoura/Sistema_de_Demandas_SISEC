@@ -22,6 +22,7 @@ function ResponsaveisDetalhado() {
   const [expandedResponsaveis, setExpandedResponsaveis] = useState<Set<string>>(new Set())
   const [currentPages, setCurrentPages] = useState<{ [key: string]: number }>({})
   const itemsPerPage = 6
+  const [filters, setFilters] = useState<{ [key: string]: { [key: string]: string } }>({})
 
   useEffect(() => {
     const fetchData = async () => {
@@ -75,6 +76,63 @@ function ResponsaveisDetalhado() {
 
     fetchData()
   }, [])
+
+  useEffect(() => {
+    const newFilters: { [key: string]: { [key: string]: string } } = {}
+    responsaveisData.forEach(resp => {
+      newFilters[resp.responsavel] = {
+        titulo: '',
+        status: '',
+        prazo: ''
+      }
+    })
+    setFilters(newFilters)
+  }, [responsaveisData])
+
+  const getUniqueValues = (responsavel: string, field: string) => {
+    const demandas = responsaveisData.find(r => r.responsavel === responsavel)?.demandas || []
+    return Array.from(new Set(demandas.map(item => item[field as keyof Demanda])))
+      .filter(Boolean)
+      .sort()
+  }
+
+  const FilterDropdown = ({ responsavel, column }: { responsavel: string, column: string }) => (
+    <div className="group relative inline-flex items-center cursor-pointer">
+      <span className="text-xs font-medium text-gray-500 uppercase tracking-wider group-hover:text-gray-700">
+        {column === 'titulo' ? 'Título' :
+         column === 'status' ? 'Status' :
+         column === 'prazo' ? 'Prazo' : column}
+      </span>
+      <select
+        value={filters[responsavel]?.[column] || ''}
+        onChange={(e) => setFilters(prev => ({
+          ...prev,
+          [responsavel]: { ...prev[responsavel], [column]: e.target.value }
+        }))}
+        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+      >
+        <option value="">Todos</option>
+        {getUniqueValues(responsavel, column).map(option => (
+          <option key={option} value={option}>
+            {column === 'status' ? formatStatus(option) : option}
+          </option>
+        ))}
+      </select>
+      <ChevronDownIcon className="w-4 h-4 ml-1 text-gray-400 group-hover:text-gray-600" />
+    </div>
+  )
+
+  const filterDemandas = (demandas: Demanda[], responsavel: string) => {
+    return demandas.filter(demanda => {
+      return Object.entries(filters[responsavel] || {}).every(([key, value]) => {
+        if (!value) return true
+        if (key === 'titulo') {
+          return demanda.titulo.toLowerCase().includes(value.toLowerCase())
+        }
+        return String(demanda[key as keyof Demanda]) === value
+      })
+    })
+  }
 
   const toggleResponsavel = (responsavel: string) => {
     setExpandedResponsaveis(prev => {
@@ -196,11 +254,12 @@ function ResponsaveisDetalhado() {
           animate="visible"
         >
           {responsaveisData.map((responsavel) => {
+            const filteredDemandas = filterDemandas(responsavel.demandas, responsavel.responsavel)
+            const totalPages = Math.ceil(filteredDemandas.length / itemsPerPage)
             const currentPage = currentPages[responsavel.responsavel] || 1
-            const totalPages = Math.ceil(responsavel.demandas.length / itemsPerPage)
             const startIndex = (currentPage - 1) * itemsPerPage
             const endIndex = startIndex + itemsPerPage
-            const currentDemandas = responsavel.demandas.slice(startIndex, endIndex)
+            const currentDemandas = filteredDemandas.slice(startIndex, endIndex)
 
             return (
               <motion.div
@@ -235,10 +294,18 @@ function ResponsaveisDetalhado() {
                     <table className="min-w-full table-fixed">
                       <thead>
                         <tr className="border-b border-gray-200">
-                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 w-32">Número</th>
-                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Título</th>
-                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 w-32">Status</th>
-                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 w-32">Prazo</th>
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 w-32">
+                            <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Número</span>
+                          </th>
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">
+                            <FilterDropdown responsavel={responsavel.responsavel} column="titulo" />
+                          </th>
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 w-32">
+                            <FilterDropdown responsavel={responsavel.responsavel} column="status" />
+                          </th>
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 w-32">
+                            <FilterDropdown responsavel={responsavel.responsavel} column="prazo" />
+                          </th>
                         </tr>
                       </thead>
                       <tbody>

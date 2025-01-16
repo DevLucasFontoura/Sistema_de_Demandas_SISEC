@@ -40,6 +40,11 @@ function NovaSolicitacao() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    if (formData.titulo.length > 70) {
+      toast.error('O título deve ter no máximo 70 caracteres')
+      return
+    }
+
     const demandaId = generateRandomId()
     const novaSolicitacao = {
       id: demandaId,
@@ -95,14 +100,20 @@ function NovaSolicitacao() {
               {/* Título */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Título
+                  Título <span className="text-xs text-gray-500">({formData.titulo.length}/70)</span>
                 </label>
                 <input
                   type="text"
                   className="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200"
                   value={formData.titulo}
-                  onChange={(e) => setFormData(prev => ({ ...prev, titulo: e.target.value }))}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    if (value.length <= 70) {
+                      setFormData(prev => ({ ...prev, titulo: value }))
+                    }
+                  }}
                   placeholder="Digite o título da solicitação"
+                  maxLength={70}
                 />
               </div>
 

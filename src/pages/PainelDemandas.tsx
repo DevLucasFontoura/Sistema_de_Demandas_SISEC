@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { getFirestore, collection, getDocs } from 'firebase/firestore'
 import { CardDemandas } from '../components/cardDemandas'
+import { Link } from 'react-router-dom'
+import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 
 interface Demanda {
   id: string
@@ -61,10 +63,18 @@ function PainelDemandas() {
   }, [])
 
   return (
-    <div className="p-2 max-w-full mx-4">
-      <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent mb-8">
-        Painel de Demandas
-      </h1>
+    <div className="p-4 md:p-8 max-w-[1920px] mx-auto">
+      <div className="flex items-center gap-4 mb-8">
+        <Link
+          to="/dashboard"
+          className="text-gray-600 hover:text-gray-900"
+        >
+          <ArrowLeftIcon className="w-6 h-6" />
+        </Link>
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+          Demandas por Responsável
+        </h1>
+      </div>
 
       <div className="flex flex-col space-y-6 w-full">
         {demandasPorResponsavel.map(({ responsavel, demandas }) => (

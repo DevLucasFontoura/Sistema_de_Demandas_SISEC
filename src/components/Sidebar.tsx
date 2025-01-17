@@ -10,7 +10,7 @@ function Sidebar() {
 
   const baseMenuItems = [
     { path: '/dashboard', icon: ChartBarIcon, label: 'Dashboard' },
-    // { path: '/painel-demandas', icon: ViewColumnsIcon, label: 'Por Responsável' },
+    { path: '/painel-demandas', icon: ViewColumnsIcon, label: 'Por Responsável' },
     { path: '/lista-solicitacoes', icon: ClipboardDocumentListIcon, label: 'Solicitações' },
   ]
   

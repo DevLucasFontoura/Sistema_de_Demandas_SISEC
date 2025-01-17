@@ -38,11 +38,21 @@ function PainelDemandas() {
         return acc
       }, {})
 
-      // Converte para array e ordena por responsável
-      const groupedArray = Object.entries(grouped).map(([responsavel, demandas]) => ({
-        responsavel,
-        demandas
-      })).sort((a, b) => a.responsavel.localeCompare(b.responsavel))
+      // Converte para array e ordena por quantidade de demandas (decrescente)
+      const groupedArray = Object.entries(grouped)
+        .map(([responsavel, demandas]) => ({
+          responsavel,
+          demandas
+        }))
+        .sort((a, b) => {
+          // Primeiro critério: quantidade de demandas (decrescente)
+          const diff = b.demandas.length - a.demandas.length
+          // Se quantidade for igual, ordena por nome do responsável
+          if (diff === 0) {
+            return a.responsavel.localeCompare(b.responsavel)
+          }
+          return diff
+        })
 
       setDemandasPorResponsavel(groupedArray)
     }
@@ -51,12 +61,12 @@ function PainelDemandas() {
   }, [])
 
   return (
-    <div className="p-8">
+    <div className="p-2 max-w-full mx-4">
       <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent mb-8">
         Painel de Demandas
       </h1>
 
-      <div className="space-y-6">
+      <div className="flex flex-col space-y-6 w-full">
         {demandasPorResponsavel.map(({ responsavel, demandas }) => (
           <CardDemandas 
             key={responsavel} 

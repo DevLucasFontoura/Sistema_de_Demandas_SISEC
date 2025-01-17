@@ -41,12 +41,25 @@ export function CardDemandas({ responsavel, demandas }: CardDemandasProps) {
               to={`/detalhes-solicitacao/${demanda.id}`}
               className="block p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-150"
             >
-              <div className="flex justify-between items-start">
-                <span className="text-sm font-medium text-blue-600">#{demanda.id}</span>
-                <StatusBadge status={demanda.status} />
-              </div>
-              <div className="mt-1 text-sm text-gray-600">
-                Prazo: {formatarData(demanda.prazo)}
+              <div className="flex flex-col space-y-2">
+                <div className="flex justify-between items-start gap-4">
+                  <div className="min-w-0 flex-1">
+                    <span className="text-sm font-medium text-blue-600 block">#{demanda.id}</span>
+                    {demanda.titulo && (
+                      <p className="text-sm text-gray-600 mt-1 break-words" title={demanda.titulo}>
+                        <span className="font-medium">Título: </span>
+                        {demanda.titulo.slice(0, 20)}
+                        {demanda.titulo.length > 20 ? '...' : ''}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex-shrink-0">
+                    <StatusBadge status={demanda.status} />
+                  </div>
+                </div>
+                <div className="text-sm text-gray-600">
+                  Prazo: {formatarData(demanda.prazo)}
+                </div>
               </div>
             </Link>
           ))}
@@ -56,19 +69,15 @@ export function CardDemandas({ responsavel, demandas }: CardDemandasProps) {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 col-span-full">
+    <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 max-w-[1600px] w-full mx-auto">
       <div className="p-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-6">{responsavel}</h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {renderDemandasSection('pendente', 'Pendentes')}
           {renderDemandasSection('em_andamento', 'Em Andamento')}
           {renderDemandasSection('concluida', 'Concluídas')}
           {renderDemandasSection('suspenso', 'Suspensas')}
-        </div>
-
-        <div className="mt-4 pt-4 border-t border-gray-200 text-sm text-gray-500">
-          Total de demandas: {demandas.length}
         </div>
       </div>
     </div>

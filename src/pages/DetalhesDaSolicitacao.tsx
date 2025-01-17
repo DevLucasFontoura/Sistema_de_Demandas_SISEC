@@ -11,6 +11,7 @@ import { Dialog, Transition } from '@headlessui/react'
 import { Fragment } from 'react'
 import { db } from '../services/firebaseConfig'
 import { SelectResponsavel } from '../components/SelectResponsavel'
+import { differenceInYears, differenceInMonths, differenceInHours, differenceInMinutes } from 'date-fns';
 
 interface Comentario {
   id: string
@@ -364,33 +365,54 @@ function DetalhesDaSolicitacaoPage() {
   };
 
   const calcularTempoSuspensao = (dataSuspensao: any) => {
-    if (!dataSuspensao) return null;
+    if (!dataSuspensao || !solicitacao?.status === 'suspenso') return null;
 
     try {
-      const suspensaoDate = dataSuspensao instanceof Date 
-        ? dataSuspensao 
-        : new Date(dataSuspensao.seconds * 1000);
-      
+      // Usa a data de suspensão e a data atual
+      const suspensaoDate = new Date(solicitacao.dataSuspensao.seconds * 1000);
       const agora = new Date();
-      const diffMillis = agora.getTime() - suspensaoDate.getTime();
       
-      const minutos = Math.floor(diffMillis / (1000 * 60));
-      const horas = Math.floor(minutos / 60);
-      const dias = Math.floor(horas / 24);
-      const semanas = Math.floor(dias / 7);
-      
-      if (semanas > 0) {
-        return `${semanas} semana${semanas > 1 ? 's' : ''} e ${dias % 7} dia${dias % 7 !== 1 ? 's' : ''}`;
+      // Debug para verificar as datas
+      console.log('Debug - Dados da Demanda:', {
+        id: solicitacao.id,
+        status: solicitacao.status,
+        suspensao: suspensaoDate.toISOString(),
+        agora: agora.toISOString()
+      });
+
+      // Calcula as diferenças
+      const horas = differenceInHours(agora, suspensaoDate);
+      const minutos = differenceInMinutes(agora, suspensaoDate) % 60;
+
+      // Debug do cálculo
+      console.log('Debug - Cálculo da Demanda:', {
+        id: solicitacao.id,
+        horas,
+        minutos,
+        diffMillis: agora.getTime() - suspensaoDate.getTime()
+      });
+
+      // Se tiver horas e minutos
+      if (horas > 0 && minutos > 0) {
+        return `${horas} hora${horas > 1 ? 's' : ''} e ${minutos} minuto${minutos > 1 ? 's' : ''}`;
       }
-      if (dias > 0) {
-        return `${dias} dia${dias > 1 ? 's' : ''} e ${horas % 24} hora${horas % 24 !== 1 ? 's' : ''}`;
-      }
+      // Se tiver só horas
       if (horas > 0) {
-        return `${horas} hora${horas > 1 ? 's' : ''} e ${minutos % 60} minuto${minutos % 60 !== 1 ? 's' : ''}`;
+        return `${horas} hora${horas > 1 ? 's' : ''}`;
       }
-      return `${minutos} minuto${minutos > 1 ? 's' : ''}`;
+      // Se tiver só minutos
+      if (minutos > 0) {
+        return `${minutos} minuto${minutos > 1 ? 's' : ''}`;
+      }
+      
+      return 'Menos de um minuto';
+      
     } catch (error) {
-      console.error('Erro ao calcular tempo de suspensão:', error);
+      console.error('Erro ao calcular tempo de suspensão:', error, {
+        demandaId: solicitacao?.id,
+        dataSuspensao: solicitacao?.dataSuspensao,
+        status: solicitacao?.status
+      });
       return 'Tempo indisponível';
     }
   };

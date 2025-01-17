@@ -33,8 +33,14 @@ export function CardDemandas({ responsavel, demandas }: CardDemandasProps) {
 
     return (
       <div className="mb-4">
-        <h3 className="text-sm font-medium text-gray-500 mb-2">{title}</h3>
-        <div className="space-y-2">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-medium text-gray-500">{title}</h3>
+          <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">
+            {demandasFiltradas.length}
+          </span>
+        </div>
+        
+        <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
           {demandasFiltradas.map(demanda => (
             <Link 
               key={demanda.id}
@@ -44,12 +50,12 @@ export function CardDemandas({ responsavel, demandas }: CardDemandasProps) {
               <div className="flex flex-col space-y-2">
                 <div className="flex justify-between items-start gap-4">
                   <div className="min-w-0 flex-1">
-                    <span className="text-sm font-medium text-blue-600 block">#{demanda.id}</span>
+                    <span className="text-sm font-medium text-blue-600 block">Nº {demanda.id}</span>
                     {demanda.titulo && (
                       <p className="text-sm text-gray-600 mt-1 break-words" title={demanda.titulo}>
                         <span className="font-medium">Título: </span>
-                        {demanda.titulo.slice(0, 20)}
-                        {demanda.titulo.length > 20 ? '...' : ''}
+                        {demanda.titulo.slice(0, 50)}
+                        {demanda.titulo.length > 50 ? '...' : ''}
                       </p>
                     )}
                   </div>
@@ -71,7 +77,12 @@ export function CardDemandas({ responsavel, demandas }: CardDemandasProps) {
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 max-w-[1600px] w-full mx-auto">
       <div className="p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">{responsavel}</h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-semibold text-gray-900">{responsavel}</h2>
+          <span className="text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
+            Total: {demandas.length}
+          </span>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {renderDemandasSection('pendente', 'Pendentes')}

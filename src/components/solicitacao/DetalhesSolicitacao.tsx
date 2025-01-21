@@ -6,7 +6,8 @@ import { StatusSolicitacao } from './StatusSolicitacao'
 import { AcoesSolicitacao } from './AcoesSolicitacoes'
 import { toast } from 'react-hot-toast'
 import { useAuth } from '../../context/AuthContext'
-import { STATUS_CONFIG, TIPOS_CONFIG, getTipoConfig, getStatusConfig } from '../../config/constants'
+import { TIPOS_CONFIG, getTipoConfig, getStatusConfig } from '../../config/constants'
+import { ComentariosSolicitacao } from './ComentariosSolicitacao'
 
 interface Arquivo {
   id: string
@@ -114,38 +115,44 @@ export function DetalhesSolicitacao({
     }))
   }
 
-  const handleAdiarSolicitacao = (novoPrazo: string, justificativa: string) => {
-    const novoAdiamento = {
-      novoPrazo,
-      justificativa,
-      dataAdiamento: new Date()
+  const handleAdiarSolicitacao = async (novoPrazo: string, justificativa: string) => {
+    try {
+      const novoAdiamento = {
+        novoPrazo,
+        justificativa,
+        dataAdiamento: new Date()
+      }
+
+      setSolicitacao(prev => ({
+        ...prev,
+        prazo: novoPrazo,
+        adiamentos: [...(prev.adiamentos || []), novoAdiamento]
+      }))
+
+      // Formata a data para DD/MM/YYYY
+      const [ano, mes, dia] = novoPrazo.split('-')
+      const dataPrazoFormatada = `${dia}/${mes}/${ano}`
+
+      // Adiciona um comentário sobre o adiamento
+      const comentarioAdiamento = {
+        id: Date.now().toString(),
+        texto: `Solicitação de adiamento para ${dataPrazoFormatada}\nJustificativa: ${justificativa}`,
+        autor: user?.name || "Sistema",
+        data: new Date(),
+        arquivos: []
+      }
+
+      setSolicitacao(prev => ({
+        ...prev,
+        comentarios: [...(prev.comentarios || []), comentarioAdiamento]
+      }))
+
+      await onSave(solicitacao)
+      toast.success('Prazo atualizado com sucesso!')
+    } catch (error) {
+      console.error('Erro ao adiar solicitação:', error)
+      toast.error('Erro ao atualizar o prazo')
     }
-
-    setSolicitacao(prev => ({
-      ...prev,
-      prazo: novoPrazo,
-      adiamentos: [...(prev.adiamentos || []), novoAdiamento]
-    }))
-
-    // Formata a data para DD / MM / YYYY
-    const [ano, mes, dia] = novoPrazo.split('-')
-    const dataPrazoFormatada = `${dia} / ${mes} / ${ano}`
-
-    // Adiciona um comentário sobre o adiamento com o novo formato
-    const comentarioAdiamento: Comentario = {
-      id: Date.now().toString(),
-      texto: `Solicitação de adiamento para ${dataPrazoFormatada}\nJustificativa: ${justificativa}`,
-      autor: "Sistema",
-      data: new Date(),
-      arquivos: []
-    }
-
-    setSolicitacao(prev => ({
-      ...prev,
-      comentarios: [...(prev.comentarios || []), comentarioAdiamento]
-    }))
-
-    toast.success('Prazo atualizado com sucesso!')
   }
 
   const formatarData = (data: any) => {
@@ -371,11 +378,13 @@ export function DetalhesSolicitacao({
         </div>
       </div>
 
-      {/* <ComentariosSolicitacao
+      <ComentariosSolicitacao
         comentarios={solicitacao.comentarios || []}
+        adiamentos={solicitacao.adiamentos || []}
         onAddComentario={handleAddComentario}
+        onAdiarSolicitacao={handleAdiarSolicitacao}
         className="bg-white border border-gray-900 rounded-lg p-6"
-      /> */}
+      />
     </div>
   )
 }

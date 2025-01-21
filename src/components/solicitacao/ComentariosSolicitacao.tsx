@@ -48,6 +48,10 @@ export function ComentariosSolicitacao({
   const isAdminOrTI = user?.role === 'adm' || user?.role === 'equipe_ti'
   const isAdmin = user?.role === 'adm'
   const [novoComentario, setNovoComentario] = useState('')
+  const [arquivos, setArquivos] = useState<File[]>([])
+
+  console.log('ComentariosSolicitacao - Renderizando componente')
+  console.log('ComentariosSolicitacao - comentarios:', comentarios)
 
   const formatDate = (date: Date | string) => {
     let localDate: Date;
@@ -70,37 +74,73 @@ export function ComentariosSolicitacao({
     return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
   }
 
-  // Processa o histórico combinado de comentários e adiamentos
-  const historicoCombinado = useMemo(() => {
-    const comentariosFormatados = comentarios.map(c => ({
-      ...c,
-      tipo: 'comentario' as const,
-      data: new Date(c.data)
+  const todosOsComentarios = useMemo(() => {
+    // Função para converter qualquer formato de data para Date
+    const parseData = (data: any): Date => {
+      if (!data) return new Date(0);
+
+      // Se for timestamp do Firebase
+      if (data?.seconds) {
+        return new Date(data.seconds * 1000);
+      }
+
+      // Se for string ISO
+      if (typeof data === 'string') {
+        return new Date(data);
+      }
+
+      // Se já for Date
+      if (data instanceof Date) {
+        return data;
+      }
+
+      return new Date(0);
+    };
+
+    // Formatar comentários
+    const comentariosFormatados = Object.entries(comentarios || {}).map(([id, comentario]) => ({
+      ...comentario,
+      id,
+      tipo: 'comentario',
+      data: parseData(comentario.dataCriacao || comentario.data)
     }));
 
-    const adiamentosFormatados = adiamentos.map(a => ({
-      id: `adiamento-${a.dataAdiamento}`,
-      autor: a.autor,
-      data: new Date(a.dataAdiamento),
-      texto: `Solicitou adiamento para ${formatDate(a.novoPrazo)}. Justificativa: ${a.justificativa}`,
-      tipo: 'adiamento' as const
+    // Formatar adiamentos
+    const adiamentosFormatados = (adiamentos || []).map((adiamento, index) => ({
+      id: `adiamento-${index}`,
+      texto: `Prazo adiado de ${adiamento.dataAntiga} para ${adiamento.dataNova}. Justificativa: ${adiamento.justificativa}`,
+      autor: adiamento.solicitante,
+      data: parseData(adiamento.data),
+      tipo: 'adiamento'
     }));
 
+    // Combinar e ordenar por data (mais recente primeiro)
     return [...comentariosFormatados, ...adiamentosFormatados]
-      .sort((a, b) => b.data.getTime() - a.data.getTime());
+      .sort((a, b) => {
+        const dataA = a.data.getTime();
+        const dataB = b.data.getTime();
+        return dataB - dataA; // Ordem decrescente (mais recente primeiro)
+      });
   }, [comentarios, adiamentos]);
 
-  // Função para lidar com a adição de comentário
-  const handleAddComentario = async () => {
-    if (novoComentario.trim()) {
-      try {
-        await onAddComentario(novoComentario)
-        setNovoComentario('') // Limpa o campo após adicionar
-        toast.success('Comentário adicionado com sucesso!')
-      } catch (error) {
-        console.error('Erro ao adicionar comentário:', error)
-        toast.error('Erro ao adicionar comentário')
-      }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    console.log('ComentariosSolicitacao - Tentando submeter comentário')
+    console.log('ComentariosSolicitacao - Texto:', novoComentario)
+    console.log('ComentariosSolicitacao - Arquivos:', arquivos)
+
+    if (!novoComentario.trim()) {
+      console.log('ComentariosSolicitacao - Comentário vazio, retornando')
+      return
+    }
+
+    try {
+      await onAddComentario(novoComentario, arquivos)
+      console.log('ComentariosSolicitacao - Comentário adicionado com sucesso')
+      setNovoComentario('')
+      setArquivos([])
+    } catch (error) {
+      console.error('ComentariosSolicitacao - Erro ao adicionar comentário:', error)
     }
   }
 
@@ -123,7 +163,7 @@ export function ComentariosSolicitacao({
           rows={4}
         />
         <button
-          onClick={handleAddComentario}
+          onClick={handleSubmit}
           className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
         >
           Adicionar Comentário
@@ -132,13 +172,19 @@ export function ComentariosSolicitacao({
 
       {/* Lista de comentários e adiamentos */}
       <div className="space-y-4">
-        {historicoCombinado.map((item) => (
+        {todosOsComentarios.map((item) => (
           <div key={item.id} className="p-4 bg-gray-50 rounded-lg">
             <div className="flex justify-between items-start">
               <div>
                 <span className="font-medium text-gray-800">{item.autor}</span>
                 <span className="text-sm text-gray-500 ml-2">
-                  {formatDate(item.data)}
+                  {item.data.toLocaleDateString('pt-BR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
                 </span>
               </div>
               {item.tipo === 'comentario' && isAdmin && onDeleteComentario && (
@@ -154,7 +200,7 @@ export function ComentariosSolicitacao({
               className="mt-2 text-gray-600 whitespace-pre-line"
               dangerouslySetInnerHTML={{ 
                 __html: item.tipo === 'comentario' 
-                  ? processText(item.texto) 
+                  ? processText(item.texto || item.mensagem) 
                   : item.texto 
               }}
             />

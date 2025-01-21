@@ -6,6 +6,7 @@ import { StatusSolicitacao } from './StatusSolicitacao'
 import { AcoesSolicitacao } from './AcoesSolicitacoes'
 import { toast } from 'react-hot-toast'
 import { useAuth } from '../../context/AuthContext'
+import { STATUS_CONFIG, TIPOS_CONFIG, getTipoConfig, getStatusConfig } from '../../config/constants'
 
 interface Arquivo {
   id: string
@@ -184,6 +185,16 @@ export function DetalhesSolicitacao({
     }
   }
 
+  const formatTipo = (tipo: string) => {
+    const config = getTipoConfig(tipo)
+    return config.label
+  }
+
+  const formatStatus = (status: string) => {
+    const config = getStatusConfig(status)
+    return config.label
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -275,14 +286,24 @@ export function DetalhesSolicitacao({
                   onChange={(e) => handleUpdate('tipo', e.target.value)}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
                 >
-                  <option value="desenvolvimento">Desenvolvimento</option>
-                  <option value="dados">Dados</option>
-                  <option value="suporte">Suporte</option>
-                  <option value="infraestrutura">Infraestrutura</option>
-                  <option value="outros">Outros</option>
+                  {Object.entries(TIPOS_CONFIG).map(([key, tipo]) => (
+                    <option key={key} value={key}>
+                      {tipo.label}
+                    </option>
+                  ))}
                 </select>
               ) : (
-                <p className="mt-1 text-gray-800">{solicitacao.tipo}</p>
+                <div>
+                  <p className="mt-1 text-gray-800">
+                    {TIPOS_CONFIG[solicitacao.tipo]?.label || `${solicitacao.tipo} (Não configurado)`}
+                  </p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Valor recebido: {solicitacao.tipo}
+                  </p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Tipos disponíveis: {Object.keys(TIPOS_CONFIG).join(', ')}
+                  </p>
+                </div>
               )}
             </div>
 

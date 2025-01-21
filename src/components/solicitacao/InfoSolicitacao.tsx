@@ -1,5 +1,6 @@
 // src/components/solicitacao/InfoSolicitacao.tsx
 import { Solicitacao } from './DetalhesSolicitacao'
+import { getStatusConfig, getTipoConfig } from '../../config/constants'
 
 interface InfoSolicitacaoProps {
   solicitacao: Solicitacao
@@ -9,16 +10,8 @@ interface InfoSolicitacaoProps {
 
 export function InfoSolicitacao({ solicitacao, isEditing, onUpdate }: InfoSolicitacaoProps) {
   const formatStatus = (status: string) => {
-    switch (status) {
-      case 'em_andamento':
-        return 'Em Andamento'
-      case 'pendente':
-        return 'Pendente'
-      case 'concluida':
-        return 'Concluída'
-      default:
-        return status
-    }
+    const config = getStatusConfig(status)
+    return config.label
   }
 
   const formatDate = (dateString: string) => {
@@ -30,14 +23,8 @@ export function InfoSolicitacao({ solicitacao, isEditing, onUpdate }: InfoSolici
   }
 
   const formatTipo = (tipo: string) => {
-    const tipos = {
-      desenvolvimento: 'Desenvolvimento',
-      dados: 'Dados',
-      suporte: 'Suporte',
-      infraestrutura: 'Infraestrutura',
-      outros: 'Outros'
-    }
-    return tipos[tipo as keyof typeof tipos] || tipo
+    const config = getTipoConfig(tipo)
+    return config.label
   }
 
   const renderField = (label: string, field: keyof Solicitacao, disabled = false) => {

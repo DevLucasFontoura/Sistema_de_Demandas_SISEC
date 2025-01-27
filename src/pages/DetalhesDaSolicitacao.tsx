@@ -365,48 +365,37 @@ function DetalhesDaSolicitacaoPage() {
   };
 
   const calcularTempoSuspensao = (dataSuspensao: any) => {
-    if (!dataSuspensao || !solicitacao?.status === 'suspenso') return null;
-
+    if (!dataSuspensao || solicitacao?.status !== 'suspenso') return null;
+  
     try {
-      // Usa a data de suspensão e a data atual
-      const suspensaoDate = new Date(solicitacao.dataSuspensao.seconds * 1000);
+      const suspensaoDate = new Date(dataSuspensao.seconds * 1000);
       const agora = new Date();
+  
+      // Calcula a diferença total em milissegundos
+      const diferencaMs = agora.getTime() - suspensaoDate.getTime();
       
-      // Debug para verificar as datas
-      console.log('Debug - Dados da Demanda:', {
-        id: solicitacao.id,
-        status: solicitacao.status,
-        suspensao: suspensaoDate.toISOString(),
-        agora: agora.toISOString()
-      });
-
-      // Calcula as diferenças
-      const horas = differenceInHours(agora, suspensaoDate);
-      const minutos = differenceInMinutes(agora, suspensaoDate) % 60;
-
-      // Debug do cálculo
-      console.log('Debug - Cálculo da Demanda:', {
-        id: solicitacao.id,
-        horas,
-        minutos,
-        diffMillis: agora.getTime() - suspensaoDate.getTime()
-      });
-
-      // Se tiver horas e minutos
-      if (horas > 0 && minutos > 0) {
-        return `${horas} hora${horas > 1 ? 's' : ''} e ${minutos} minuto${minutos > 1 ? 's' : ''}`;
+      // Converte para dias, horas e minutos
+      const dias = Math.floor(diferencaMs / (1000 * 60 * 60 * 24));
+      const horasMs = diferencaMs % (1000 * 60 * 60 * 24);
+      const horas = Math.floor(horasMs / (1000 * 60 * 60));
+      const minutosMs = horasMs % (1000 * 60 * 60);
+      const minutos = Math.floor(minutosMs / (1000 * 60));
+  
+      // Monta a string de tempo
+      const partes = [];
+      
+      if (dias > 0) {
+        partes.push(`${dias} dia${dias > 1 ? 's' : ''}`);
       }
-      // Se tiver só horas
       if (horas > 0) {
-        return `${horas} hora${horas > 1 ? 's' : ''}`;
+        partes.push(`${horas} hora${horas > 1 ? 's' : ''}`);
       }
-      // Se tiver só minutos
       if (minutos > 0) {
-        return `${minutos} minuto${minutos > 1 ? 's' : ''}`;
+        partes.push(`${minutos} minuto${minutos > 1 ? 's' : ''}`);
       }
-      
-      return 'Menos de um minuto';
-      
+  
+      return partes.length > 0 ? partes.join(' e ') : 'Menos de um minuto';
+  
     } catch (error) {
       console.error('Erro ao calcular tempo de suspensão:', error, {
         demandaId: solicitacao?.id,

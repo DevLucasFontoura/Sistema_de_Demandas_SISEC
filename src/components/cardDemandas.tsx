@@ -15,10 +15,10 @@ interface CardDemandasProps {
 }
 
 export function CardDemandas({ responsavel, demandas }: CardDemandasProps) {
-  const formatarData = (data: string) => {
-    if (!data) return 'Não definido'
-    const date = new Date(data)
-    return date.toLocaleDateString('pt-BR')
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
+    return date.toLocaleDateString('pt-BR');
   }
 
   const demandasPorStatus = {
@@ -69,7 +69,7 @@ export function CardDemandas({ responsavel, demandas }: CardDemandasProps) {
                         </p>
                       )}
                       <p className="text-sm text-gray-500 mt-1">
-                        Prazo: {formatarData(demanda.prazo)}
+                        Prazo: {formatDate(demanda.prazo)}
                       </p>
                     </div>
                     <div className="flex-shrink-0 pt-1">

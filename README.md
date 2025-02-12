@@ -1,50 +1,61 @@
-# React + TypeScript + Vite
+# Sistema de Controle de Demandas
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 📋 Sobre o Projeto
 
-Currently, two official plugins are available:
+O Sistema de Controle de Demandas é uma aplicação web desenvolvida para gerenciar e acompanhar solicitações de serviços de TI de forma eficiente. Construída com React e TypeScript, a aplicação oferece uma interface moderna e intuitiva para o gerenciamento completo do ciclo de vida das demandas.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Funcionalidades Principais
 
-## Expanding the ESLint configuration
+- **Gestão de Solicitações**
+    - Criação e acompanhamento de demandas
+    - Categorização por tipo (Desenvolvimento, Dados, Suporte, Infraestrutura)
+    - Sistema de priorização e status
+    - Atribuição de responsáveis
+- **Painel Administrativo**
+    - Dashboard com métricas e indicadores
+    - Gestão de usuários com diferentes níveis de acesso
+    - Acompanhamento de prazos e status
+- **Recursos Avançados**
+    - Sistema de comentários em tempo real
+    - Histórico de alterações
+    - Gestão de prazos com sistema de adiamento
+    - Notificações e alertas
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## 🛠️ Tecnologias Utilizadas
 
-- Configure the top-level `parserOptions` property like this:
+- React
+- TypeScript
+- Firebase (Authentication e Firestore)
+- Tailwind CSS
+- React Router
+- Context API
+- Recharts (para gráficos)
+- React Hot Toast
+- Framer Motion
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+## 💡 Destaques do Projeto
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+- **Arquitetura Escalável**: Desenvolvido com padrões modernos de componentização
+- **UI/UX**: Interface limpa e responsiva com animações suaves
+- **Segurança**: Sistema robusto de autenticação e autorização
+- **Performance**: Otimizado para carregamento rápido e experiência fluida
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+## 🔒 Controle de Acesso
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+O sistema possui três níveis de acesso:
+
+- **Administrador**: Acesso total ao sistema
+- **Equipe TI**: Gerenciamento de demandas e atribuições
+- **Usuário Normal**: Criação e acompanhamento de solicitações
+
+## 🎯 Objetivo
+
+O projeto foi desenvolvido com o objetivo de otimizar o fluxo de trabalho em departamentos de TI, oferecendo uma solução completa para o gerenciamento de demandas, desde a solicitação inicial até a conclusão.
+
+## 📈 Benefícios
+
+- Maior transparência no acompanhamento de demandas
+- Redução no tempo de resposta
+- Melhor organização do fluxo de trabalho
+- Facilidade na priorização de tarefas
+- Histórico completo de atendimentos

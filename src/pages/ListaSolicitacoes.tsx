@@ -7,10 +7,12 @@ import {
   TrashIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  ChevronDownIcon
+  ChevronDownIcon,
+  ArrowDownTrayIcon
 } from '@heroicons/react/24/outline'
 import { getFirestore, collection, getDocs, deleteDoc, doc } from 'firebase/firestore'
 import { useAuth } from '../context/AuthContext'
+import { exportarDemandas } from '../services/demandas'
 import Swal from 'sweetalert2'
 import { toast } from 'react-hot-toast'
 
@@ -468,14 +470,43 @@ function ListaSolicitacoes() {
     )
   }
 
+  const handleExportar = async () => {
+    try {
+      await exportarDemandas()
+      toast.success('Demandas exportadas com sucesso!')
+    } catch (error) {
+      console.error('Erro ao exportar demandas:', error)
+      toast.error('Erro ao exportar demandas')
+    }
+  }
+
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-          Lista de Solicitações
-        </h1>
-        
-        <div className="flex items-center space-x-4">
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        <header className="mb-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Link
+                to="/dashboard"
+                className="text-gray-600 hover:text-gray-900"
+              >
+                <ArrowDownTrayIcon className="w-6 h-6" />
+              </Link>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
+                Lista de Solicitações
+              </h1>
+            </div>
+            <button
+              onClick={handleExportar}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <ArrowDownTrayIcon className="w-5 h-5" />
+              Exportar Demandas
+            </button>
+          </div>
+        </header>
+
+        <div className="flex justify-between items-center mb-8">
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
@@ -489,20 +520,20 @@ function ListaSolicitacoes() {
             />
           </div>
         </div>
+
+        {renderStatusSection('pendente', 'Pendentes')}
+        {renderStatusSection('em_andamento', 'Em Andamento')}
+        {renderStatusSection('concluida', 'Concluídas')}
+        {renderStatusSection('suspenso', 'Suspensas')}
+
+        {filteredSolicitacoes.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">
+              Nenhuma solicitação encontrada.
+            </p>
+          </div>
+        )}
       </div>
-
-      {renderStatusSection('pendente', 'Pendentes')}
-      {renderStatusSection('em_andamento', 'Em Andamento')}
-      {renderStatusSection('concluida', 'Concluídas')}
-      {renderStatusSection('suspenso', 'Suspensas')}
-
-      {filteredSolicitacoes.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-500 text-lg">
-            Nenhuma solicitação encontrada.
-          </p>
-        </div>
-      )}
     </div>
   )
 }

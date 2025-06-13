@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { HomeIcon, PlusCircleIcon, ClipboardDocumentListIcon, ArrowLeftOnRectangleIcon, UserPlusIcon, ViewColumnsIcon, ChartBarIcon } from '@heroicons/react/24/outline'
+import { HomeIcon, PlusCircleIcon, ClipboardDocumentListIcon, ArrowLeftOnRectangleIcon, UserPlusIcon, ViewColumnsIcon, ChartBarIcon, ListBulletIcon } from '@heroicons/react/24/outline'
 import { useAuth } from '../context/AuthContext'
 
 function Sidebar() {
@@ -12,6 +12,7 @@ function Sidebar() {
     { path: '/dashboard', icon: ChartBarIcon, label: 'Dashboard' },
     // { path: '/painel-demandas', icon: ViewColumnsIcon, label: 'Por Responsável' },
     { path: '/lista-solicitacoes', icon: ClipboardDocumentListIcon, label: 'Solicitações' },
+    { path: '/demandas-prioridade', icon: ListBulletIcon, label: 'Demandas por Prioridade' },
   ]
   
   const adminMenuItems = [

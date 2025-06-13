@@ -11,6 +11,7 @@ import ListaUsuarios from './pages/ListaUsuarios'
 import PainelDemandas from './pages/PainelDemandas'
 import ProtectedRoute from './components/ProtectedRoute'
 import ResponsaveisDetalhado from './pages/ResponsaveisDetalhado'
+import DemandasPorPrioridade from './pages/DemandasPorPrioridade'
 
 function App() {
   return (
@@ -33,6 +34,10 @@ function App() {
                     <Route path="lista-usuarios" element={<ListaUsuarios />} />
                     <Route path="/" element={<Navigate to="/dashboard" />} />
                     <Route path="responsaveis-detalhado" element={<ResponsaveisDetalhado />} />
+                    <Route
+                      path="demandas-prioridade"
+                      element={<DemandasPorPrioridade />}
+                    />
                   </Routes>
                 </AppLayout>
               </ProtectedRoute>
